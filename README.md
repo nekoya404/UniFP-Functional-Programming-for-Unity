@@ -1,18 +1,18 @@
-# UniFP — Unity 함수형 파이프라인
-
-> **UniFP의 목표**
->
-> ❌ 유니티 전역 스크립트를 전부 함수형으로 재작성하기🙅‍♂️🙅‍♂️🙅‍♂️🙅‍♂️🙅‍♂️🙅‍♂️🙅‍♂️
->
-> ✅ 기존 로직 중 복잡한 분기·에러 처리를 함수형 파이프라인으로 단순화하기🙆‍♂️🙆‍♂️🙆‍♂️🙆‍♂️🙆‍♂️🙆‍♂️🙆‍♂️🙆‍♂️
+# UniFP — C# Functional Programming for Unity
 
 [![Unity](https://img.shields.io/badge/Unity-2020.3%2B-000?logo=unity)](https://unity.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-success.svg)](./LICENSE)
 [![Release](https://img.shields.io/badge/version-v1.0.0-blue)](https://github.com/Nekoya-Jin/UniFP/releases)
 
-UniFP는 Unity 게임 로직에 함수형 사고방식과 명시적 에러 처리를 도입하는 GC제로 C# 함수형 프로그래밍 프레임워크입니다.
+UniFP는 Unity 게임 로직에 함수형 사고방식과 명시적 에러 처리를 도입하는 GC ZERO allocation C# 함수형 프로그래밍 프레임워크입니다.
 
 기존 C# 함수형 라이브러리(예: [language-ext](https://github.com/louthy/language-ext))는 범용 .NET 환경을 겨냥해 방대한 기능과 복잡한 추상화를 포함하고 있으며, 그만큼 학습 곡선이 가파르고 구조체를 활용하지 않는 경우가 많아 Unity 런타임에서 GC 할당과 성능 손실이 발생하기 쉽습니다. 이러한 무거운 의존성 없이도 게임 플레이 코드에서 안전한 오류 처리와 선언적 파이프라인을 활용할 수 있도록, 실시간 애플리케이션에 최적화된 경량 대안을 목표로 UniFP를 개발했습니다.
+
+ **UniFP의 목표**
+
+ ❌ 유니티 전역 스크립트를 전부 함수형으로 재작성하기🙅‍♂️🙅‍♂️🙅‍♂️🙅‍♂️🙅‍♂️🙅‍♂️🙅‍♂️
+
+ ✅ 기존 로직 중 복잡한 분기·에러 처리를 함수형 파이프라인으로 단순화하기🙆‍♂️🙆‍♂️🙆‍♂️🙆‍♂️🙆‍♂️🙆‍♂️🙆‍♂️🙆‍♂️
 
  `Result<T>`와 `Option<T>`를 기반으로 한 파이프라인 확장을 제공하여 예외 대신 타입 안전한 흐름 제어를 구현하면서도 GC 부담은 최소화합니다.
 
