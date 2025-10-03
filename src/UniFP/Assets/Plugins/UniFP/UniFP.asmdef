@@ -1,0 +1,27 @@
+{
+    "name": "UniFP",
+    "rootNamespace": "UniFP",
+    "references": [
+        "GUID:f51ebe6a0ceec4240a699833d6309b23"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.cysharp.unitask",
+            "expression": "",
+            "define": "UNIFP_UNITASK"
+        },
+        {
+            "name": "com.unity.modules.unitywebrequest",
+            "expression": "6.0.0",
+            "define": "UNIFP_AWAITABLE"
+        }
+    ],
+    "noEngineReferences": false
+}
