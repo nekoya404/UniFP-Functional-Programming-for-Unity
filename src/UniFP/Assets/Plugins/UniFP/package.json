@@ -1,0 +1,23 @@
+{
+    "name": "com.yourcompany.unifp",
+    "version": "1.0.0",
+    "displayName": "UniFP",
+    "description": "Functional programming library for Unity - safe error handling with the Result monad and pipeline pattern",
+    "unity": "2020.3",
+    "documentationUrl": "https://github.com/YOUR_USERNAME/UniFP",
+    "changelogUrl": "https://github.com/YOUR_USERNAME/UniFP/blob/master/CHANGELOG.md",
+    "licensesUrl": "https://github.com/YOUR_USERNAME/UniFP/blob/master/LICENSE",
+    "keywords": [
+        "functional",
+        "monad",
+        "result",
+        "pipe",
+        "error-handling",
+        "fp"
+    ],
+    "author": {
+        "name": "Your Name",
+        "email": "your.email@example.com",
+        "url": "https://github.com/YOUR_USERNAME"
+    }
+}
