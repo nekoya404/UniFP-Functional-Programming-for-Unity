@@ -6,7 +6,7 @@
 
 [![Unity](https://img.shields.io/badge/Unity-2020.3%2B-000?logo=unity)](https://unity.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-success.svg)](./LICENSE)
-[![Release](https://img.shields.io/badge/version-v1.0.0-blue)](https://github.com/Nekoya-Jin/UniFP/releases)
+[![Release](https://img.shields.io/github/v/release/Nekoya-Jin/UniFP?label=version&color=blue)](https://github.com/Nekoya-Jin/UniFP/releases)
 
 UniFP is a GC zero-allocation C# functional programming framework for Unity, inspired by Rust, Haskell, and F#. It brings functional thinking and explicit error handling to game logic without hurting runtime performance.
 
@@ -32,6 +32,7 @@ UniFP was developed as a lightweight alternative optimized for real-time applica
 - [Getting Started](#getting-started)
   - [UPM Installation (Recommended)](#upm-installation-recommended)
   - [Manual Installation](#manual-installation)
+  - [Dependencies](#dependencies)
 - [Core Concepts](#core-concepts)
   - [`Result<T>` — Escape the if/else and try/catch Hell 🔥🔥🔥](#resultt--escape-the-ifelse-and-trycatch-hell-)
   - [`Option<T>` — Escape the Null Hell 🔥🔥🔥](#optiont--escape-the-null-hell-)
@@ -88,6 +89,14 @@ To modify `Packages/manifest.json` directly, add the following dependency:
 ### Manual Installation
 
 Copy the `src/UniFP/Assets/Plugins/UniFP` directory to your project under `Assets/Plugins/UniFP`. Include `UniFP.asmdef` to keep Unity build times fast.
+
+### Dependencies
+
+UniFP requires **UniTask**. It will be installed automatically with UPM installation, but for manual installation, you need to install it separately:
+
+```text
+https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask
+```
 
 ## Core Concepts
 

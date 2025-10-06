@@ -6,7 +6,7 @@
 
 [![Unity](https://img.shields.io/badge/Unity-2020.3%2B-000?logo=unity)](https://unity.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-success.svg)](./LICENSE)
-[![Release](https://img.shields.io/badge/version-v1.0.0-blue)](https://github.com/Nekoya-Jin/UniFP/releases)
+[![Release](https://img.shields.io/github/v/release/Nekoya-Jin/UniFP?label=version&color=blue)](https://github.com/Nekoya-Jin/UniFP/releases)
 
 UniFP 是一款受 Rust、Haskell 与 F# 启发的 Unity 专用 C# 函数式编程框架，追求 GC 零分配，让函数式思维与显式错误处理安全落地在游戏逻辑中。
 
@@ -31,6 +31,7 @@ UniFP 将 Rust 式的类型精度与函数式语言的“铁路编程”理念�
 - [开始使用](#开始使用)
   - [通过 UPM 安装（推荐）](#通过-upm-安装推荐)
   - [手动安装](#手动安装)
+  - [依赖项](#依赖项)
 - [核心概念](#核心概念)
   - [`Result<T>` —— 逃离 if/else 与 try/catch 迷宫 🔥🔥🔥](#resultt--逃离-ifelse-与-trycatch-迷宫-)
   - [`Option<T>` —— 不再被 null 检查淹没 👻](#optiont--不再被-null-检查淹没-)
@@ -87,6 +88,14 @@ UniFP 将 Rust 式的类型精度与函数式语言的“铁路编程”理念�
 ### 手动安装
 
 将 `src/UniFP/Assets/Plugins/UniFP` 拷贝到项目的 `Assets/Plugins/UniFP`。请保留 `UniFP.asmdef`，以确保 Unity 编译速度。
+
+### 依赖项
+
+UniFP 需要 **UniTask**。通过 UPM 安装时会自动安装，但手动安装时需要单独安装：
+
+```text
+https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask
+```
 
 ## 核心概念
 

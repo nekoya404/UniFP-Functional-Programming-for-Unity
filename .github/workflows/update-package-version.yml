@@ -1,0 +1,103 @@
+name: Update Package Version
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # v1.0.0, v1.0.1 등의 태그가 푸시될 때 실행
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          # 태그 이름에서 'v' 제거하여 버전 추출 (예: v1.0.2 -> 1.0.2)
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Extracted version: $VERSION"
+      
+      - name: Update package.json version
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          PACKAGE_FILE="src/UniFP/Assets/Plugins/UniFP/package.json"
+          
+          # jq를 사용하여 package.json의 version 필드 업데이트
+          jq --arg ver "$VERSION" '.version = $ver' "$PACKAGE_FILE" > tmp.json
+          mv tmp.json "$PACKAGE_FILE"
+          
+          echo "✅ Updated package.json to version $VERSION"
+          cat "$PACKAGE_FILE"
+      
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No changes detected"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "📝 Changes detected"
+          fi
+      
+      - name: Commit and push changes
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add src/UniFP/Assets/Plugins/UniFP/package.json
+          git commit -m "chore: update package.json version to $VERSION [skip ci]"
+          
+          # 태그가 생성된 커밋에 변경사항 추가 (force push)
+          git push origin HEAD:main
+          
+          echo "✅ Changes committed and pushed"
+      
+      - name: Update tag to include version change
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          TAG_NAME="v$VERSION"
+          
+          # 기존 태그 삭제
+          git tag -d "$TAG_NAME" || true
+          git push origin ":refs/tags/$TAG_NAME" || true
+          
+          # 새로운 태그 생성 (업데이트된 커밋에)
+          git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
+          git push origin "$TAG_NAME"
+          
+          echo "✅ Tag $TAG_NAME updated"
+      
+      - name: Create Release
+        if: steps.check_changes.outputs.changed == 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.get_version.outputs.version }}
+          name: Release v${{ steps.get_version.outputs.version }}
+          body: |
+            ## UniFP v${{ steps.get_version.outputs.version }}
+            
+            ### 변경사항
+            자세한 변경사항은 [커밋 히스토리](https://github.com/${{ github.repository }}/commits/v${{ steps.get_version.outputs.version }})를 확인해주세요.
+            
+            ### 설치 방법
+            
+            Unity Package Manager에서 다음 URL을 사용하여 설치:
+            ```
+            https://github.com/${{ github.repository }}.git?path=src/UniFP/Assets/Plugins/UniFP#v${{ steps.get_version.outputs.version }}
+            ```
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

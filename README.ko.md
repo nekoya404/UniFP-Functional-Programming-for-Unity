@@ -6,7 +6,7 @@
 
 [![Unity](https://img.shields.io/badge/Unity-2020.3%2B-000?logo=unity)](https://unity.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-success.svg)](./LICENSE)
-[![Release](https://img.shields.io/badge/version-v1.0.0-blue)](https://github.com/Nekoya-Jin/UniFP/releases)
+[![Release](https://img.shields.io/github/v/release/Nekoya-Jin/UniFP?label=version&color=blue)](https://github.com/Nekoya-Jin/UniFP/releases)
 
 UniFP는 Rust과 Haskell, F# 영감을 받아, Unity 게임 로직에 함수형 사고방식과 명시적 에러 처리를 도입하는 GC ZERO allocation C# 함수형 프로그래밍 프레임워크입니다.
 
@@ -32,6 +32,7 @@ UniFP는 Rust과 Haskell, F# 영감을 받아, Unity 게임 로직에 함수형 
 - [시작하기](#시작하기)
   - [UPM 설치 (권장)](#upm-설치-권장)
   - [수동 설치](#수동-설치)
+  - [의존성](#의존성)
 - [핵심 개념](#핵심-개념)
   - [`Result<T>` — **if/else와 try/catch 지옥**에서 해방 🔥🔥🔥](#resultt--ifelse와-trycatch-지옥에서-해방-)
   - [`Option<T>` — **Null지옥**에서 해방 🔥🔥🔥](#optiont--null지옥에서-해방-)
@@ -88,6 +89,14 @@ UniFP는 Rust과 Haskell, F# 영감을 받아, Unity 게임 로직에 함수형 
 ### 수동 설치
 
 `src/UniFP/Assets/Plugins/UniFP` 디렉터리를 프로젝트의 `Assets/Plugins/UniFP` 아래로 복사합니다. `UniFP.asmdef`를 포함해야 Unity 빌드 타임이 빠르게 유지됩니다.
+
+### 의존성
+
+UniFP는 **UniTask**를 필요로 합니다. UPM 설치 시 자동으로 설치되지만, 수동 설치 시에는 별도로 설치해야 합니다:
+
+```text
+https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask
+```
 
 ## 핵심 개념
 
