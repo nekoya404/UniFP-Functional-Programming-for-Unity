@@ -200,7 +200,7 @@ namespace UniFP.Tests
                 );
 
             Assert.IsTrue(result.IsFailure);
-            Assert.That(result.ErrorMessage, Does.Contain("network error"));
+            Assert.That(result.GetErrorMessage(), Does.Contain("network error"));
         }
 
         [Test]

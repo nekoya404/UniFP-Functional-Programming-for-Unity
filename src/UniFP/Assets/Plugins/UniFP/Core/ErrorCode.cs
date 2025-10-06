@@ -1,94 +1,110 @@
+using System;
+
 namespace UniFP
 {
     /// <summary>
-    /// Performance-optimized error codes (zero allocation alternative to string errors)
-    /// Use this for hot paths where GC allocation is critical
+    /// Extensible error code structure (Zero GC)
+    /// Allows both built-in and custom error codes
     /// </summary>
-    public enum ErrorCode
+    public readonly struct ErrorCode : IEquatable<ErrorCode>
     {
-        /// <summary>No error</summary>
-        None = 0,
-        
-        /// <summary>Generic error</summary>
-        Unknown = 1,
-        
-        /// <summary>Resource not found</summary>
-        NotFound = 100,
-        
-        /// <summary>Invalid input or argument</summary>
-        InvalidInput = 101,
-        
-        /// <summary>Validation failed</summary>
-        ValidationFailed = 102,
-        
-        /// <summary>Operation not permitted</summary>
-        Unauthorized = 103,
-        
-        /// <summary>Resource already exists</summary>
-        AlreadyExists = 104,
-        
-        /// <summary>Insufficient resources (e.g., not enough currency)</summary>
-        InsufficientResources = 105,
-        
-        /// <summary>Capacity exceeded (e.g., inventory full)</summary>
-        Capacity = 106,
-        
-        /// <summary>Database error</summary>
-        DatabaseError = 200,
-        
-        /// <summary>Network error</summary>
-        NetworkError = 201,
-        
-        /// <summary>File I/O error</summary>
-        FileError = 202,
-        
-        /// <summary>Timeout occurred</summary>
-        Timeout = 203,
-        
-        /// <summary>Operation cancelled</summary>
-        Cancelled = 204,
-        
-        /// <summary>Out of memory</summary>
-        OutOfMemory = 300,
-        
-        /// <summary>Null reference</summary>
-        NullReference = 301,
-        
-        /// <summary>Index out of range</summary>
-        IndexOutOfRange = 302,
-    }
+        private readonly int _code;
+        private readonly string _category;
+
+        private ErrorCode(int code, string category = null)
+        {
+            _code = code;
+            _category = category;
+        }
+
+        // Built-in error codes (0-999 reserved)
+        public static readonly ErrorCode None = new ErrorCode(0, "System");
+        public static readonly ErrorCode Unknown = new ErrorCode(1, "System");
+        public static readonly ErrorCode NotFound = new ErrorCode(100, "Validation");
+        public static readonly ErrorCode InvalidInput = new ErrorCode(101, "Validation");
+        public static readonly ErrorCode ValidationFailed = new ErrorCode(102, "Validation");
+        public static readonly ErrorCode Unauthorized = new ErrorCode(103, "Security");
+        public static readonly ErrorCode AlreadyExists = new ErrorCode(104, "Validation");
+        public static readonly ErrorCode InsufficientResources = new ErrorCode(105, "Resource");
+        public static readonly ErrorCode Capacity = new ErrorCode(106, "Resource");
+        public static readonly ErrorCode DatabaseError = new ErrorCode(200, "Database");
+        public static readonly ErrorCode NetworkError = new ErrorCode(201, "Network");
+        public static readonly ErrorCode FileError = new ErrorCode(202, "IO");
+        public static readonly ErrorCode Timeout = new ErrorCode(203, "Network");
+        public static readonly ErrorCode Cancelled = new ErrorCode(204, "System");
+        public static readonly ErrorCode OperationCanceled = new ErrorCode(204, "System");
+        public static readonly ErrorCode OutOfMemory = new ErrorCode(300, "System");
+        public static readonly ErrorCode NullReference = new ErrorCode(301, "System");
+        public static readonly ErrorCode IndexOutOfRange = new ErrorCode(302, "System");
+
+        /// <summary>
+        /// Create a custom error code (use codes >= 1000 to avoid conflicts)
+        /// </summary>
+        public static ErrorCode Custom(int code, string category = "Custom")
+        {
+            if (code < 1000)
+                throw new ArgumentException("Custom error codes must be >= 1000 to avoid conflicts with built-in codes");
+            return new ErrorCode(code, category);
+        }
+
+        public int Code => _code;
+        public string Category => _category ?? "Unknown";
+
+        public bool Equals(ErrorCode other)
+        {
+            return _code == other._code;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is ErrorCode other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return _code;
+        }
+
+        public static bool operator ==(ErrorCode left, ErrorCode right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(ErrorCode left, ErrorCode right)
+        {
+            return !left.Equals(right);
+        }
+
+        public override string ToString()
+        {
+            return _category != null ? $"{_category}:{_code}" : _code.ToString();
+        }
 
 #if UNITY_EDITOR || UNIFP_DEBUG
-    /// <summary>
-    /// Extension methods for ErrorCode (only available in Editor/Debug builds for debugging)
-    /// </summary>
-    public static class ErrorCodeExtensions
-    {
-        /// <summary>Convert ErrorCode to display string (allocates, only in Editor/Debug)</summary>
-        public static string ToDisplayString(this ErrorCode errorCode)
+        public string ToDisplayString()
         {
-            return errorCode switch
+            return (_code, _category) switch
             {
-                ErrorCode.None => "No error",
-                ErrorCode.Unknown => "Unknown error",
-                ErrorCode.NotFound => "Resource not found",
-                ErrorCode.InvalidInput => "Invalid input",
-                ErrorCode.ValidationFailed => "Validation failed",
-                ErrorCode.Unauthorized => "Unauthorized",
-                ErrorCode.AlreadyExists => "Already exists",
-                ErrorCode.InsufficientResources => "Insufficient resources",
-                ErrorCode.Capacity => "Capacity exceeded",
-                ErrorCode.DatabaseError => "Database error",
-                ErrorCode.NetworkError => "Network error",
-                ErrorCode.FileError => "File error",
-                ErrorCode.Timeout => "Timeout",
-                ErrorCode.Cancelled => "Cancelled",
-                ErrorCode.OutOfMemory => "Out of memory",
-                ErrorCode.NullReference => "Null reference",
-                ErrorCode.IndexOutOfRange => "Index out of range",
-                _ => $"Unknown error code: {(int)errorCode}"
+                (0, _) => "No error",
+                (1, _) => "Unknown error",
+                (100, _) => "Resource not found",
+                (101, _) => "Invalid input",
+                (102, _) => "Validation failed",
+                (103, _) => "Unauthorized",
+                (104, _) => "Already exists",
+                (105, _) => "Insufficient resources",
+                (106, _) => "Capacity exceeded",
+                (200, _) => "Database error",
+                (201, _) => "Network error",
+                (202, _) => "File error",
+                (203, _) => "Timeout",
+                (204, _) => "Cancelled",
+                (300, _) => "Out of memory",
+                (301, _) => "Null reference",
+                (302, _) => "Index out of range",
+                _ => _category != null ? $"{_category} error (code: {_code})" : $"Error code: {_code}"
             };
         }
-    }
 #endif
+    }
 }

@@ -13,7 +13,6 @@ namespace UniFP
         private readonly T _head;
         private readonly List<T> _tail;
 
-        #region Properties
 
         /// <summary>First element (always exists)</summary>
         public T Head => _head;
@@ -27,9 +26,7 @@ namespace UniFP
         /// <summary>Last element</summary>
         public T Last => _tail.Count > 0 ? _tail[_tail.Count - 1] : _head;
 
-        #endregion
 
-        #region Construction
 
         public NonEmpty(T head, params T[] tail)
         {
@@ -53,9 +50,7 @@ namespace UniFP
                 : Option<NonEmpty<T>>.None();
         }
 
-        #endregion
 
-        #region Operations
 
         /// <summary>Transform all elements</summary>
         public NonEmpty<TResult> Map<TResult>(Func<T, TResult> mapper)
@@ -129,9 +124,7 @@ namespace UniFP
             }
         }
 
-        #endregion
 
-        #region IEnumerable
 
         public IEnumerator<T> GetEnumerator()
         {
@@ -142,7 +135,6 @@ namespace UniFP
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        #endregion
 
         public override string ToString()
         {

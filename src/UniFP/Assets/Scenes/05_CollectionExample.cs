@@ -166,14 +166,13 @@ namespace UniFP.Examples
                     break;
             }
 
-            var result = ResultCombinators.FirstSuccess<string>(triedResults.ToArray());
+            var result = Result.FirstSuccess<string>(triedResults.ToArray());
 
             result.Match(
                 onSuccess: data => Debug.Log($"✓ Loaded from first available source: {data}"),
                 onFailure: (ErrorCode error) => Debug.LogError($"✗ All sources failed: {error}")
             );
         }
-
         Result<string> LoadFromCache()
         {
             Debug.Log("Trying cache...");

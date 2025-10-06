@@ -10,7 +10,6 @@ namespace UniFP
     /// </summary>
     public static class PipelineDebug
     {
-        #region Result Debugging
 
         /// <summary>Trace Result at this point in pipeline</summary>
         public static Result<T> Trace<T>(
@@ -82,9 +81,7 @@ namespace UniFP
             return result;
         }
 
-        #endregion
 
-        #region Option Debugging
 
         /// <summary>Trace Option at this point in pipeline</summary>
         public static Option<T> Trace<T>(
@@ -104,9 +101,7 @@ namespace UniFP
             return option;
         }
 
-        #endregion
 
-        #region Performance Tracing
 
         /// <summary>Measure execution time</summary>
         public static Result<T> TraceTime<T>(
@@ -140,9 +135,7 @@ namespace UniFP
             };
         }
 
-        #endregion
 
-        #region Conditional Logging
 
         /// <summary>Trace only on failure</summary>
         public static Result<T> TraceOnFailure<T>(
@@ -176,6 +169,5 @@ namespace UniFP
             return result;
         }
 
-        #endregion
     }
 }

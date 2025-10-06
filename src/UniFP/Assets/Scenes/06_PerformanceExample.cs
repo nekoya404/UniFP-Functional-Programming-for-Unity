@@ -41,24 +41,24 @@ namespace UniFP.Examples
 
             // ⚠️ Allocates - string message (for debugging)
             var result2 = Result<int>.Failure("Custom error message");
-            UnityEngine.Debug.Log($"Error Message: {result2.ErrorMessage}");
+            UnityEngine.Debug.Log($"Error Message: {result2.GetErrorMessage()}");
 
-            // Branch based on ErrorCode
+            // Branch based on ErrorCode (use if-else for struct comparison)
             result1.Match(
                 onSuccess: v => UnityEngine.Debug.Log($"Success: {v}"),
                 onFailure: (ErrorCode error) =>
                 {
-                    switch (error)
+                    if (error.Equals(ErrorCode.InvalidInput))
                     {
-                        case ErrorCode.InvalidInput:
-                            UnityEngine.Debug.LogWarning("✓ Handled InvalidInput (Zero GC)");
-                            break;
-                        case ErrorCode.NotFound:
-                            UnityEngine.Debug.LogWarning("Not found");
-                            break;
-                        default:
-                            UnityEngine.Debug.LogWarning($"Unknown: {error}");
-                            break;
+                        UnityEngine.Debug.LogWarning("✓ Handled InvalidInput (Zero GC)");
+                    }
+                    else if (error.Equals(ErrorCode.NotFound))
+                    {
+                        UnityEngine.Debug.LogWarning("Not found");
+                    }
+                    else
+                    {
+                        UnityEngine.Debug.LogWarning($"Unknown: {error}");
                     }
                 }
             );

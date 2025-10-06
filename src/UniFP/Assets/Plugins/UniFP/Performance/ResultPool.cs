@@ -69,6 +69,7 @@ namespace UniFP.Performance
 
         /// <summary>
         /// Helper to use pooled list with automatic release
+        /// Exception-safe: list is cleared before release even if action throws
         /// </summary>
         public static TResult UsePooledList<T, TResult>(Func<List<T>, TResult> action)
         {
@@ -76,6 +77,11 @@ namespace UniFP.Performance
             try
             {
                 return action(list);
+            }
+            catch
+            {
+                list.Clear();
+                throw;
             }
             finally
             {
@@ -85,6 +91,7 @@ namespace UniFP.Performance
 
         /// <summary>
         /// Helper to use pooled list with automatic release (with initial capacity)
+        /// Exception-safe: list is cleared before release even if action throws
         /// </summary>
         public static TResult UsePooledList<T, TResult>(int capacity, Func<List<T>, TResult> action)
         {
@@ -92,6 +99,11 @@ namespace UniFP.Performance
             try
             {
                 return action(list);
+            }
+            catch
+            {
+                list.Clear();
+                throw;
             }
             finally
             {
@@ -109,12 +121,12 @@ namespace UniFP.Performance
         public static Result<List<int>> BadExample(int[] items)
         {
             var results = new List<int>();  // Heap allocation!
-            
+
             foreach (var item in items)
             {
                 results.Add(item * 2);
             }
-            
+
             return Result<List<int>>.Success(results);
         }
 
@@ -127,7 +139,7 @@ namespace UniFP.Performance
                 {
                     list.Add(item * 2);
                 }
-                
+
                 // Copy to new list before releasing pool
                 var result = new List<int>(list);
                 return Result<List<int>>.Success(result);
@@ -138,14 +150,14 @@ namespace UniFP.Performance
         public static Result<List<int>> BestExample(int[] items)
         {
             var list = ResultPool.ListPool<int>.Get(items.Length);
-            
+
             try
             {
                 foreach (var item in items)
                 {
                     list.Add(item * 2);
                 }
-                
+
                 var result = new List<int>(list);
                 return Result<List<int>>.Success(result);
             }

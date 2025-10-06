@@ -61,7 +61,7 @@ namespace UniFP.Examples
 
             // Approach 2: custom message (for debugging)
             var result2 = Result<int>.Failure("Something went wrong");
-            Debug.Log($"Error Message: {result2.ErrorMessage}");
+            Debug.Log($"Error Message: {result2.GetErrorMessage()}");
 
             // Check the error state
             if (result1.IsFailure)
@@ -69,10 +69,6 @@ namespace UniFP.Examples
                 Debug.LogWarning($"✗ Failed! ErrorCode = {result1.ErrorCode}");
             }
         }
-
-        #endregion
-
-        #region Conditional Example
 
         void ConditionalExample()
         {
@@ -97,10 +93,6 @@ namespace UniFP.Examples
             return Result<int>.Success(age);
         }
 
-        #endregion
-
-        #region Try Example
-
         void TryExample()
         {
             Debug.Log("\n--- Try Example ---");
@@ -118,7 +110,7 @@ namespace UniFP.Examples
             }
             else
             {
-                Debug.LogError($"✗ Parse failed: {result.ErrorMessage}");
+                Debug.LogError($"✗ Parse failed: {result.GetErrorMessage()}");
             }
         }
 

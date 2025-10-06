@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace UniFP.Performance
@@ -6,11 +7,10 @@ namespace UniFP.Performance
     /// <summary>
     /// Static delegate cache to avoid GC allocations in hot paths
     /// Store commonly used lambdas as static fields
+    /// Thread-safe implementation using ConcurrentDictionary
     /// </summary>
     public static class DelegateCache
     {
-        #region Common Predicates
-
         /// <summary>Check if value is greater than zero</summary>
         public static readonly Func<int, bool> IsPositive = x => x > 0;
 
@@ -30,10 +30,6 @@ namespace UniFP.Performance
 
         /// <summary>Check if string is not null or whitespace</summary>
         public static readonly Func<string, bool> IsNotNullOrWhitespace = s => !string.IsNullOrWhiteSpace(s);
-
-        #endregion
-
-        #region Common Transformations
 
         /// <summary>Convert to string</summary>
         public static Func<T, string> ToString<T>()
@@ -57,33 +53,23 @@ namespace UniFP.Performance
             public static readonly Func<T, T> Value = x => x;
         }
 
-        #endregion
-
-        #region Custom Cache
-
-        private static readonly Dictionary<string, Delegate> _customCache = new Dictionary<string, Delegate>();
+        /// <summary>Thread-safe custom delegate cache</summary>
+        private static readonly ConcurrentDictionary<string, Delegate> _customCache = new ConcurrentDictionary<string, Delegate>();
 
         /// <summary>
-        /// Cache a delegate with a key
+        /// Cache a delegate with a key (Thread-safe)
         /// Use this for frequently used lambdas
         /// </summary>
         public static TDelegate GetOrAdd<TDelegate>(string key, Func<TDelegate> factory) where TDelegate : Delegate
         {
-            if (_customCache.TryGetValue(key, out var cached))
-                return (TDelegate)cached;
-
-            var del = factory();
-            _customCache[key] = del;
-            return del;
+            return (TDelegate)_customCache.GetOrAdd(key, _ => factory());
         }
 
-        /// <summary>Clear custom cache</summary>
+        /// <summary>Clear custom cache (Thread-safe)</summary>
         public static void Clear()
         {
             _customCache.Clear();
         }
-
-        #endregion
     }
 
     /// <summary>
@@ -105,7 +91,7 @@ namespace UniFP.Performance
 
         // ✅ Good - custom cached delegate
         private static readonly Func<User, bool> IsAdult = u => u.Age >= 18;
-        
+
         public static void CustomExample(Result<User> result)
         {
             result.Filter(IsAdult, "Must be adult");  // Zero allocation!

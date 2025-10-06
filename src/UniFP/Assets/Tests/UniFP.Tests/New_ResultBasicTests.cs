@@ -61,7 +61,7 @@ namespace UniFP.Tests
             var result = Result<int>.Failure("custom error");
 
             Assert.IsTrue(result.IsFailure);
-            Assert.That(result.ErrorMessage, Does.Contain("custom error"));
+            Assert.That(result.GetErrorMessage(), Does.Contain("custom error"));
         }
 
         [Test]
@@ -92,7 +92,7 @@ namespace UniFP.Tests
             var result = Result.TryFromValue<int>(() => throw new System.Exception("test error"));
 
             Assert.IsTrue(result.IsFailure);
-            Assert.That(result.ErrorMessage, Does.Contain("test error"));
+            Assert.That(result.GetErrorMessage(), Does.Contain("test error"));
         }
 
         [Test]

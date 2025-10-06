@@ -250,26 +250,29 @@ namespace UniFP.Examples.RealWorld
 
         void HandleLoginError(ErrorCode error)
         {
-            switch (error)
+            if (error.Equals(ErrorCode.InvalidInput))
             {
-                case ErrorCode.InvalidInput:
-                    Debug.LogError("Please check your email and password");
-                    break;
-                case ErrorCode.ValidationFailed:
-                    Debug.LogError("Email or password format is invalid");
-                    break;
-                case ErrorCode.NotFound:
-                    Debug.LogError("User not found");
-                    break;
-                case ErrorCode.NetworkError:
-                    Debug.LogError("Network connection failed. Please try again");
-                    break;
-                case ErrorCode.Timeout:
-                    Debug.LogError("Request timed out. Please check your connection");
-                    break;
-                default:
-                    Debug.LogError($"An unexpected error occurred: {error}");
-                    break;
+                Debug.LogError("Please check your email and password");
+            }
+            else if (error.Equals(ErrorCode.ValidationFailed))
+            {
+                Debug.LogError("Email or password format is invalid");
+            }
+            else if (error.Equals(ErrorCode.NotFound))
+            {
+                Debug.LogError("User not found");
+            }
+            else if (error.Equals(ErrorCode.NetworkError))
+            {
+                Debug.LogError("Network connection failed. Please try again");
+            }
+            else if (error.Equals(ErrorCode.Timeout))
+            {
+                Debug.LogError("Request timed out. Please check your connection");
+            }
+            else
+            {
+                Debug.LogError($"An unexpected error occurred: {error}");
             }
         }
 
