@@ -6,7 +6,7 @@
 
 [![Unity](https://img.shields.io/badge/Unity-2020.3%2B-000?logo=unity)](https://unity.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-success.svg)](./LICENSE)
-[![Release](https://img.shields.io/github/v/release/Nekoya-Jin/UniFP?label=version&color=blue)](https://github.com/Nekoya-Jin/UniFP/releases)
+[![Version](https://img.shields.io/github/package-json/v/Nekoya-Jin/UniFP?filename=src%2FUniFP%2FAssets%2FPlugins%2FUniFP%2Fpackage.json&label=version&color=blue)](https://github.com/Nekoya-Jin/UniFP/releases)
 
 UniFP는 Rust과 Haskell, F# 영감을 받아, Unity 게임 로직에 함수형 사고방식과 명시적 에러 처리를 도입하는 GC ZERO allocation C# 함수형 프로그래밍 프레임워크입니다.
 

@@ -6,7 +6,7 @@
 
 [![Unity](https://img.shields.io/badge/Unity-2020.3%2B-000?logo=unity)](https://unity.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-success.svg)](./LICENSE)
-[![Release](https://img.shields.io/github/v/release/Nekoya-Jin/UniFP?label=version&color=blue)](https://github.com/Nekoya-Jin/UniFP/releases)
+[![Version](https://img.shields.io/github/package-json/v/Nekoya-Jin/UniFP?filename=src%2FUniFP%2FAssets%2FPlugins%2FUniFP%2Fpackage.json&label=version&color=blue)](https://github.com/Nekoya-Jin/UniFP/releases)
 
 UniFP is a GC zero-allocation C# functional programming framework for Unity, inspired by Rust, Haskell, and F#. It brings functional thinking and explicit error handling to game logic without hurting runtime performance.
 

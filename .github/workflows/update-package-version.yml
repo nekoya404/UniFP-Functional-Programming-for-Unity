@@ -9,6 +9,9 @@ jobs:
   update-version:
     runs-on: ubuntu-latest
     
+    permissions:
+      contents: write
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -57,31 +60,12 @@ jobs:
           
           git add src/UniFP/Assets/Plugins/UniFP/package.json
           git commit -m "chore: update package.json version to $VERSION [skip ci]"
-          
-          # 태그가 생성된 커밋에 변경사항 추가 (force push)
           git push origin HEAD:main
           
           echo "✅ Changes committed and pushed"
       
-      - name: Update tag to include version change
-        if: steps.check_changes.outputs.changed == 'true'
-        run: |
-          VERSION=${{ steps.get_version.outputs.version }}
-          TAG_NAME="v$VERSION"
-          
-          # 기존 태그 삭제
-          git tag -d "$TAG_NAME" || true
-          git push origin ":refs/tags/$TAG_NAME" || true
-          
-          # 새로운 태그 생성 (업데이트된 커밋에)
-          git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
-          git push origin "$TAG_NAME"
-          
-          echo "✅ Tag $TAG_NAME updated"
-      
       - name: Create Release
-        if: steps.check_changes.outputs.changed == 'true'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.get_version.outputs.version }}
           name: Release v${{ steps.get_version.outputs.version }}

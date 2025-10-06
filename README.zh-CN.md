@@ -6,7 +6,7 @@
 
 [![Unity](https://img.shields.io/badge/Unity-2020.3%2B-000?logo=unity)](https://unity.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-success.svg)](./LICENSE)
-[![Release](https://img.shields.io/github/v/release/Nekoya-Jin/UniFP?label=version&color=blue)](https://github.com/Nekoya-Jin/UniFP/releases)
+[![Version](https://img.shields.io/github/package-json/v/Nekoya-Jin/UniFP?filename=src%2FUniFP%2FAssets%2FPlugins%2FUniFP%2Fpackage.json&label=version&color=blue)](https://github.com/Nekoya-Jin/UniFP/releases)
 
 UniFP 是一款受 Rust、Haskell 与 F# 启发的 Unity 专用 C# 函数式编程框架，追求 GC 零分配，让函数式思维与显式错误处理安全落地在游戏逻辑中。
 
