@@ -87,215 +87,42 @@ UniFP was developed as a lightweight alternative optimized for real-time applica
 
 ### UniFP vs Unity-NOPE
 
-#### Performance Comparison
+**Performance Comparison:**
+- ✅ Zero-GC struct design (all core types stack-allocated)
+- ✅ Delegate caching for Update loop optimization
+- ✅ Built-in ResultPool & ListPool
 
-UniFP prioritizes performance.
+**Feature Comparison:**
+- UniFP's `Then` = NOPE's `Bind` (C#-friendly naming)
+- Additional features: Retry, RetryWithBackoff, Trace, Breakpoint
+- Advanced collection extensions: SelectResults, CombineAll, Partition
 
-**1. Zero-GC Struct Design**
-- UniFP: All core types are `readonly struct` with stack allocation
-- Unity-NOPE: `Result<T,E>` is a `readonly struct`, but generic error type `E` may cause boxing
+**Error Typing:**
+UniFP uses `ErrorCode` struct, optimized for 99% of Unity game scenarios.
+For complex domain logic requiring type-safe errors, custom ErrorCode patterns are available.
 
-**2. Delegate Caching**
-- UniFP: `DelegateCache` reuses frequently-used lambdas → Prevents heap allocation
-- Unity-NOPE: No delegate caching → Repeated creation in Update loops
-
-**3. ResultPool & ListPool**
-- UniFP: Built-in object pooling for high-frequency scenarios
-- Unity-NOPE: No pooling mechanism
-
-#### Feature Comparison
-
-NOPE's core features are also implemented in UniFP. However, UniFP uses naming more familiar to C# users.
-UniFP's `Then` = NOPE's `Bind`, UniFP's `Filter` = NOPE's `Ensure`
-
-**High-Level Feature Comparison**
-
-| Feature | UniFP | Unity-NOPE |
-|---------|-------|------------|
-| Result Monad | `Result<T>` (single type) | `Result<T,E>` (typed errors) |
-| Option Monad | `Option<T>` | `Maybe<T>` |
-| Async Support | UniTask + Awaitable | UniTask + Awaitable |
-| Error Type | `ErrorCode` (struct, efficient) | `E` (generic, flexible but may box) |
-| Pipeline Operations | Then, Map, Filter, Recover, Do... | Bind, Map, Ensure, Tap, Finally... |
-| Retry Logic | Retry, RetryWithBackoff, Repeat | Not supported |
-| Result Combining | ResultCombinators (Combine, Zip...) | Result.Combine, CombineValues |
-| Collection Traversal | SelectResults, CombineAll, Partition | Limited |
-| Performance Optimizations | DelegateCache, Pools, Span extensions | Basic structs only |
-| Debugging Tools | Trace, Breakpoint, SafeExecutor | Basic Match only |
-
-**Detailed Method Comparison**
-
-| Method Category | UniFP | Unity-NOPE | Description |
-|----------------|-------|------------|-------------|
-| **Basic Transformations** |
-| `Map` | ✅ | ✅ | Transform value on success (T → U) |
-| `Bind` (Then) | ✅ `Then` | ✅ `Bind` | Chain Result-returning functions (T → Result\<U\>) |
-| `Filter` | ✅ | ⚠️ `Ensure` | Conditional validation (fail to Failure) |
-| **Error Handling** |
-| `MapError` | ⚠️ ErrorCode only | ✅ | Transform error type |
-| `Recover` | ✅ | ⚠️ `OrElse` | Recover failure with default value |
-| `IfFailed` | ✅ | ⚠️ `Or` | Provide alternative Result on failure |
-| `Catch` | ✅ | ❌ | Intercept specific error for recovery |
-| **Side Effects** |
-| `Do` | ✅ | ⚠️ `Tap` | Execute side effect on success (no value change) |
-| `DoStrict` | ✅ | ❌ | Abort pipeline if side effect fails |
-| `IfFailed(Action)` | ✅ | ❌ | Execute side effect only on failure |
-| **Conditional Execution** |
-| `ThenIf` | ✅ | ❌ | Conditional Then |
-| `MapIf` | ✅ | ❌ | Conditional Map |
-| `Where` | ⚠️ Option only | ✅ Maybe only | Conditional filtering |
-| **Result Inspection** |
-| `Match` | ✅ | ✅ | Execute different functions based on success/failure |
-| `Finally` | ⚠️ Similar to `Match` | ✅ | Terminate chain and final processing |
-| `Assert` | ✅ | ⚠️ Similar to `Ensure` | Condition validation (debug) |
-| **Async (UniTask/Awaitable)** |
-| `ThenAsync` | ✅ | ⚠️ `Bind` overload | Async Result chaining |
-| `MapAsync` | ✅ | ⚠️ `Map` overload | Async value transformation |
-| `FilterAsync` | ✅ | ❌ | Async conditional validation |
-| `DoAsync` | ✅ | ❌ | Async side effects |
-| `TryAsync` | ✅ | ⚠️ `Of` | Convert exceptions to Result (async) |
-| **Resilience** |
-| `Retry` | ✅ | ❌ | Retry on failure |
-| `RetryAsync` | ✅ | ❌ | Async retry |
-| `RetryWithBackoff` | ✅ | ❌ | Exponential backoff retry |
-| `Repeat` | ✅ | ❌ | Require N consecutive successes |
-| **Result Combining** |
-| `Combine` | ✅ | ✅ | Combine multiple Results |
-| `Zip` | ✅ | ⚠️ `CombineValues` | Combine Results into tuple |
-| `CombineAll` | ✅ | ❌ | List\<Result\> → Result\<List\> |
-| `Partition` | ✅ | ❌ | Separate successes/failures |
-| **Collection Extensions** |
-| `SelectResults` | ✅ | ❌ | Collection → List\<Result\>, abort on failure |
-| `FilterResults` | ✅ | ❌ | Conditional filtering + Result |
-| `Fold` | ✅ | ❌ | Aggregate collection (return Result) |
-| `AggregateResults` | ✅ | ❌ | Complex aggregation logic |
-| **Creation Helpers** |
-| `Success` | ✅ | ✅ | Create success Result |
-| `Failure` | ✅ | ✅ | Create failure Result |
-| `FromValue` | ✅ | ⚠️ implicit | Create Result from value |
-| `SuccessIf` | ⚠️ Similar to `Filter` | ✅ | Conditional success/failure creation |
-| `FailureIf` | ⚠️ Opposite of `Filter` | ✅ | Conditional failure/success creation |
-| `Of` | ⚠️ `Try` | ✅ | Exception → Result conversion |
-| **Safe Operations** |
-| `BindSafe` | ❌ | ✅ | Bind with exception handling |
-| `MapSafe` | ❌ | ✅ | Map with exception handling |
-| `TapSafe` | ❌ | ✅ | Tap with exception handling |
-| **Debugging** |
-| `Trace` | ✅ | ❌ | Trace pipeline steps |
-| `TraceWith` | ✅ | ❌ | Trace with custom message |
-| `TraceOnFailure` | ✅ | ❌ | Trace only on failure |
-| `Breakpoint` | ✅ | ❌ | Set debugger breakpoint |
-
-**Legend:**
-- ✅ Fully supported
-- ⚠️ Partially supported or provided under different name
-- ❌ Not supported
-
-**Key Differences:**
-1. **UniFP**: More resilience utilities (Retry, Repeat), debugging tools, collection extensions
-2. **Unity-NOPE**: Safe-series methods (built-in exception handling), more flexible MapError with typed errors
-3. **Naming differences**: UniFP's `Then` = NOPE's `Bind`, UniFP's `Filter` = NOPE's `Ensure`
-
-#### Error Typing: Unnecessary for 99% of Cases
-
-Unity-NOPE can type errors with `Result<T,E>`, but in Unity game development, this is **usually over-engineering**:
-
-**Why are typed errors unnecessary?**
-- Unity game logic mainly cares about "Did it succeed? Did it fail?"
-- Error **message** is more useful than error **type** (for debugging/logging)
-- Typed errors increase generic parameters → Code complexity increases
-- Most failures fall into simple categories like "resource load failed", "validation failed"
-
-**UniFP's Approach: ErrorCode Struct**
-```csharp
-// UniFP: Efficient and clear error classification
-var result = LoadAsset()
-    .Filter(x => x != null, ErrorCode.NotFound)
-    .Then(ValidateAsset);  // May return ErrorCode.ValidationFailed
-
-if (result.IsFailure)
-{
-    Debug.LogError($"[{result.ErrorCode.Category}] {result.Error}");
-    // [Resource] Asset not found: player_model.prefab
-}
-```
-
-**For the 1% Case: When Type-Safe Errors Are Really Needed**
-
-If you really need typed errors for complex domain logic:
-
-```csharp
-// Method 1: Use custom ErrorCode
-public static class PaymentErrors
-{
-    public static readonly ErrorCode InsufficientFunds = ErrorCode.Custom(1001, "Payment");
-    public static readonly ErrorCode InvalidCard = ErrorCode.Custom(1002, "Payment");
-    public static readonly ErrorCode NetworkTimeout = ErrorCode.Custom(1003, "Payment");
-}
-
-var paymentResult = ProcessPayment()
-    .Recover(code => code == PaymentErrors.NetworkTimeout 
-        ? RetryPayment() 
-        : RefundUser());
-
-// Method 2: Discriminated Union Pattern (C# 9.0+)
-public record PaymentError
-{
-    public record InsufficientFunds(decimal Required, decimal Available) : PaymentError;
-    public record InvalidCard(string CardNumber) : PaymentError;
-    public record NetworkTimeout(int Attempts) : PaymentError;
-}
-
-// Store serialized in Result's Error message
-var result = payment switch
-{
-    PaymentError.InsufficientFunds e => 
-        Result<Payment>.Failure(ErrorCode.Custom(1001, "Payment"), 
-                                $"Insufficient: {e.Required - e.Available}"),
-    // ...
-};
-```
+**➡️ Detailed Comparison: [Library Comparison Documentation](./docs/library-comparison.md)**
 
 ---
 
 ### UniFP vs language-ext
 
-#### Why Not Use language-ext Directly in Unity?
+**Why Not Use language-ext Directly in Unity?**
+- ❌ No Unity runtime optimization (class-based, GC pressure)
+- ❌ Overwhelming feature complexity (100+ monads, Higher-kinded types)
+- ❌ Steep learning curve (Haskell background required)
+- ✅ UniFP: Unity-specific minimal set, start with C# LINQ experience only
 
-language-ext is the best functional library in the .NET ecosystem, but it's not suitable for Unity:
+**Quick Comparison:**
 
-**1. Lack of Unity Runtime Optimization**
-- language-ext is designed for general-purpose .NET
-- Many types are class-based → Increased GC pressure
-- Potential compatibility issues with Unity's IL2CPP AOT compilation
+| Category | language-ext | UniFP |
+|----------|--------------|-------|
+| Core Monads | Option, Either, Try, Validation, Fin | Result, Option, NonEmpty |
+| Performance | High abstraction overhead | Zero-GC structs, pooling optimization |
+| Learning Curve | Steep (Haskell) | Gentle (C# LINQ) |
+| Unity Integration | Limited | UniTask/Awaitable native support |
 
-**2. Overwhelming Feature Complexity**
-- Over 100 monads and transformers
-- Higher-kinded types simulation (complex generic patterns)
-- Unnecessary features for game development: Parsec, Lenses, Free monads, etc.
-
-**3. Learning Curve**
-- Haskell-style naming conventions (`camelCase` static functions)
-- Complex abstractions in the Trait system
-- Excessive functional concepts unfamiliar to Unity developers
-
-**4. Performance Overhead**
-- Indirect calls due to high-level abstractions
-- Difficulty identifying hot paths in Unity Profiler
-
-#### Feature Comparison
-
-| Category | language-ext | UniFP | Unity Game Development Perspective |
-|----------|-------------|-------|-----------------------------------|
-| **Core Monads** | Option, Either, Try, Validation, Fin | Result, Option, NonEmpty | UniFP provides Unity-specific minimal set ✅ |
-| **Immutable Collections** | Arr, Lst, Seq, Map, HashMap, Set... | Standard C# collections + extension methods | language-ext excellent but excessive for Unity ⚠️ |
-| **Async** | IO monad, Eff, Pipes, StreamT | AsyncResult (UniTask/Awaitable) | UniFP better Unity ecosystem integration ✅ |
-| **Error Handling** | Either<L,R>, Validation<E,S>, Fin<A> | Result<T> + ErrorCode | UniFP simpler and clearer ✅ |
-| **Parser Combinators** | Parsec (full implementation) | Not supported | Unnecessary for games (language-ext wins) ❌ |
-| **Lenses & Optics** | Full support | Not supported | Excessive for games (Unreal FProperty more appropriate) ❌ |
-| **Atomic Concurrency** | Atom, Ref, AtomHashMap | Not supported | Unity is single-threaded, use C# standard if needed ⚠️ |
-| **Performance** | Overhead from high-level abstractions | Zero-GC structs, pooling optimizations | UniFP optimized for Unity ✅ |
-| **Learning Curve** | Steep (Haskell background needed) | Gentle (can start with just C# LINQ experience) | UniFP better accessibility ✅ |
+**➡️ Detailed Comparison: [Library Comparison Documentation](./docs/library-comparison.md)**
 
 ---
 
@@ -321,10 +148,6 @@ To modify `Packages/manifest.json` directly, add the following dependency:
   }
 }
 ```
-
-### Manual Installation
-
-Copy the `src/UniFP/Assets/Plugins/UniFP` directory to your project under `Assets/Plugins/UniFP`. Include `UniFP.asmdef` to keep Unity build times fast.
 
 ### Optional Dependencies
 
