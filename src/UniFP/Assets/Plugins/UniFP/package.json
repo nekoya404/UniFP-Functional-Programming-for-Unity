@@ -1,6 +1,6 @@
 {
   "name": "com.nekoya.unifp",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "displayName": "UniFP",
   "description": "Functional programming library for Unity",
   "unity": "2020.3",
@@ -19,8 +19,5 @@
     "name": "Nekoya",
     "email": "dldjwls131@naver.com",
     "url": "https://github.com/Nekoya-Jin"
-  },
-  "dependencies": {
-    "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask"
   }
 }

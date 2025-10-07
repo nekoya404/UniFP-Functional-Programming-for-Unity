@@ -31,8 +31,11 @@ namespace UniFP
             return new Result<T>(false, default, ErrorCode.Unknown, customErrorMessage);
         }
 
-        /// <summary>Internal: Create failure with both ErrorCode and custom message</summary>
-        internal static Result<T> Failure(ErrorCode errorCode, string customErrorMessage)
+        /// <summary>
+        /// Create failure with both ErrorCode and custom message (allocates string)
+        /// Use for detailed error reporting with custom context
+        /// </summary>
+        public static Result<T> Failure(ErrorCode errorCode, string customErrorMessage)
         {
             return new Result<T>(false, default, errorCode, customErrorMessage);
         }

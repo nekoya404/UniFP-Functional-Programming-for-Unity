@@ -11,6 +11,17 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.cysharp.unitask",
+            "expression": "",
+            "define": "UNIFP_UNITASK"
+        },
+        {
+            "name": "com.unity.modules.unitywebrequest",
+            "expression": "6.0.0",
+            "define": "UNIFP_AWAITABLE"
+        }
+    ],
     "noEngineReferences": false
 }

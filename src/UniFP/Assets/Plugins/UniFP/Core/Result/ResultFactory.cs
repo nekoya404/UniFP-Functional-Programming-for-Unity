@@ -49,5 +49,65 @@ namespace UniFP
                 filePath,
                 lineNumber);
         }
+
+        /// <summary>Return Success if condition is true, otherwise Failure (Zero GC)</summary>
+        public static Result<T> SuccessIf<T>(
+            bool condition,
+            T value,
+            ErrorCode errorCode)
+        {
+            return condition
+                ? Result<T>.Success(value)
+                : Result<T>.Failure(errorCode);
+        }
+
+        /// <summary>Evaluate condition function and return Success/Failure (Zero GC)</summary>
+        public static Result<T> SuccessIf<T>(
+            Func<bool> conditionFunc,
+            T value,
+            ErrorCode errorCode,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string filePath = "",
+            [CallerLineNumber] int lineNumber = 0)
+        {
+            return Internal.SafeExecutor.Execute(
+                () => conditionFunc()
+                    ? Result<T>.Success(value)
+                    : Result<T>.Failure(errorCode),
+                OperationType.FromValue,
+                memberName,
+                filePath,
+                lineNumber);
+        }
+
+        /// <summary>Return Success if condition is false, otherwise Failure (Zero GC)</summary>
+        public static Result<T> FailureIf<T>(
+            bool condition,
+            T value,
+            ErrorCode errorCode)
+        {
+            return !condition
+                ? Result<T>.Success(value)
+                : Result<T>.Failure(errorCode);
+        }
+
+        /// <summary>Evaluate condition function and return Success/Failure (returns Success if false) (Zero GC)</summary>
+        public static Result<T> FailureIf<T>(
+            Func<bool> conditionFunc,
+            T value,
+            ErrorCode errorCode,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string filePath = "",
+            [CallerLineNumber] int lineNumber = 0)
+        {
+            return Internal.SafeExecutor.Execute(
+                () => !conditionFunc()
+                    ? Result<T>.Success(value)
+                    : Result<T>.Failure(errorCode),
+                OperationType.FromValue,
+                memberName,
+                filePath,
+                lineNumber);
+        }
     }
 }

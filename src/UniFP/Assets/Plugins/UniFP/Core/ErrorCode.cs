@@ -24,6 +24,8 @@ namespace UniFP
         public static readonly ErrorCode InvalidInput = new ErrorCode(101, "Validation");
         public static readonly ErrorCode ValidationFailed = new ErrorCode(102, "Validation");
         public static readonly ErrorCode Unauthorized = new ErrorCode(103, "Security");
+        public static readonly ErrorCode Forbidden = new ErrorCode(107, "Security");
+        public static readonly ErrorCode InvalidOperation = new ErrorCode(108, "Validation");
         public static readonly ErrorCode AlreadyExists = new ErrorCode(104, "Validation");
         public static readonly ErrorCode InsufficientResources = new ErrorCode(105, "Resource");
         public static readonly ErrorCode Capacity = new ErrorCode(106, "Resource");
@@ -94,6 +96,8 @@ namespace UniFP
                 (104, _) => "Already exists",
                 (105, _) => "Insufficient resources",
                 (106, _) => "Capacity exceeded",
+                (107, _) => "Forbidden",
+                (108, _) => "Invalid operation",
                 (200, _) => "Database error",
                 (201, _) => "Network error",
                 (202, _) => "File error",

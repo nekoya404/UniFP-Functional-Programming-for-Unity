@@ -1,12 +1,6 @@
 ![C# Functional Programming for Unity Capsule Header](https://capsule-render.vercel.app/api?type=waving&height=220&color=0:5A2BFF,100:1FB5E9&text=C%23%20Functional%20Programming%20for%20Unity&fontAlign=50&fontAlignY=40&fontSize=46&fontColor=FFFFFF&desc=UniFP&descAlign=50&descAlignY=65&descSize=24)
 
-[English](./README.md) ·### Manual Installation
-
-Copy the `src/UniFP/Assets/Plugins/UniFP` directory to your project under `Assets/Plugins/UniFP`. Include `UniFP.asmdef` to keep Unity build times fast.
-
-### Optional Dependencies
-
-UniFP works standalone, but you can enhance async functionality by installing one of the following:/README.ko.md) · [简体中文](./README.zh-CN.md) · [日本語](./README.ja.md)
+[English](./README.md) · [한국어](./README.ko.md) · [简体中文](./README.zh-CN.md) · [日本語](./README.ja.md)
 
 # UniFP — C# Functional Programming for Unity
 

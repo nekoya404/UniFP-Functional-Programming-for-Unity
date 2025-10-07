@@ -28,6 +28,11 @@ namespace UniFP
             return Result<(T1, T2)>.Success((result1.Value, result2.Value));
         }
 
+        /// <summary>Combine 2 Results into a tuple - NOPE compatibility alias</summary>
+        public static Result<(T1, T2)> CombineValues<T1, T2>(
+            Result<T1> result1,
+            Result<T2> result2) => Combine(result1, result2);
+
         /// <summary>Combine 3 Results into a tuple</summary>
         public static Result<(T1, T2, T3)> Combine<T1, T2, T3>(
             Result<T1> result1,
@@ -43,6 +48,12 @@ namespace UniFP
 
             return Result<(T1, T2, T3)>.Success((result1.Value, result2.Value, result3.Value));
         }
+
+        /// <summary>Combine 3 Results into a tuple - NOPE compatibility alias</summary>
+        public static Result<(T1, T2, T3)> CombineValues<T1, T2, T3>(
+            Result<T1> result1,
+            Result<T2> result2,
+            Result<T3> result3) => Combine(result1, result2, result3);
 
         /// <summary>Combine 4 Results into a tuple</summary>
         public static Result<(T1, T2, T3, T4)> Combine<T1, T2, T3, T4>(
@@ -66,6 +77,13 @@ namespace UniFP
                 result3.Value,
                 result4.Value));
         }
+
+        /// <summary>Combine 4 Results into a tuple - NOPE compatibility alias</summary>
+        public static Result<(T1, T2, T3, T4)> CombineValues<T1, T2, T3, T4>(
+            Result<T1> result1,
+            Result<T2> result2,
+            Result<T3> result3,
+            Result<T4> result4) => Combine(result1, result2, result3, result4);
 
         /// <summary>
         /// Returns the first successful Result, or the last failure if all fail

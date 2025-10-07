@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+#if UNIFP_UNITASK
 using Cysharp.Threading.Tasks;
+#endif
 using UniFP.Performance;
 
 namespace UniFP
@@ -8,6 +10,7 @@ namespace UniFP
     /// <summary>
     /// Select operations for Result collections
     /// Uses ResultPool for GC-friendly list allocations
+    /// Supports both UniTask (UNIFP_UNITASK) and Unity Awaitable (UNIFP_AWAITABLE)
     /// </summary>
     public static partial class ResultCollectionExtensions
     {
@@ -34,8 +37,9 @@ namespace UniFP
             });
         }
 
+#if UNIFP_UNITASK
         /// <summary>
-        /// Maps each element to an async Result and collects successes
+        /// Maps each element to an async Result and collects successes (UniTask version)
         /// Returns failure on first error
         /// </summary>
         public static async UniTask<Result<List<TResult>>> SelectResultsAsync<TSource, TResult>(
@@ -56,5 +60,30 @@ namespace UniFP
                 return Result<List<TResult>>.Success(new List<TResult>(pooledList));
             });
         }
+#elif UNIFP_AWAITABLE
+        /// <summary>
+        /// Maps each element to an async Result and collects successes (Unity Awaitable version - fallback)
+        /// Returns failure on first error
+        /// </summary>
+        public static async Awaitable<Result<List<TResult>>> SelectResultsAsync<TSource, TResult>(
+            this IEnumerable<TSource> source,
+            Func<TSource, Awaitable<Result<TResult>>> selector)
+        {
+            return await ResultPool.UsePooledList<TResult, Awaitable<Result<List<TResult>>>>(async pooledList =>
+            {
+                foreach (var item in source)
+                {
+                    var result = await selector(item);
+                    if (result.IsFailure)
+                        return Result<List<TResult>>.Failure(result.ErrorCode);
+
+                    pooledList.Add(result.Value);
+                }
+
+                return Result<List<TResult>>.Success(new List<TResult>(pooledList));
+            });
+        }
+#endif
     }
 }
+
