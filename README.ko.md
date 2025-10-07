@@ -1,6 +1,6 @@
 ![C# Functional Programming for Unity Capsule Header](https://capsule-render.vercel.app/api?type=waving&height=220&color=0:5A2BFF,100:1FB5E9&text=C%23%20Functional%20Programming%20for%20Unity&fontAlign=50&fontAlignY=40&fontSize=46&fontColor=FFFFFF&desc=UniFP&descAlign=50&descAlignY=65&descSize=24)
 
-[English](./README.md) · [한국어](./README.ko.md) · [简体中文](./README.zh-CN.md)
+[English](./README.md) · [한국어](./README.ko.md) · [简体中文](./README.zh-CN.md) · [日本語](./README.ja.md)
 
 # UniFP — C# Functional Programming for Unity
 
@@ -29,21 +29,41 @@ UniFP는 Rust과 Haskell, F# 영감을 받아, Unity 게임 로직에 함수형 
 ## 목차
 
 - [핵심 하이라이트](#핵심-하이라이트)
+- [다른 라이브러리와의 비교](#다른-라이브러리와의-비교)
 - [시작하기](#시작하기)
   - [UPM 설치 (권장)](#upm-설치-권장)
   - [수동 설치](#수동-설치)
-  - [의존성](#의존성)
+  - [선택적 의존성](#선택적-의존성)
 - [핵심 개념](#핵심-개념)
-  - [`Result<T>` — **if/else와 try/catch 지옥**에서 해방 🔥🔥🔥](#resultt--ifelse와-trycatch-지옥에서-해방-)
-  - [`Option<T>` — **Null지옥**에서 해방 🔥🔥🔥](#optiont--null지옥에서-해방-)
+  - [`Result<T>` 사용법](#resultt-사용법)
+    - [Result 생성하기](#result-생성하기)
+    - [핵심 메서드: Then, Map, Filter](#핵심-메서드-then-map-filter)
+    - [에러 처리 및 복구](#에러-처리-및-복구)
+    - [부수 효과 (Side Effects)](#부수-효과-side-effects)
+    - [조건부 실행](#조건부-실행)
+    - [비동기 Result (UniTask / Awaitable)](#비동기-result-unitask--awaitable)
+  - [`Option<T>` 사용법](#optiont-사용법)
+    - [Option 생성하기](#option-생성하기)
+    - [핵심 Option 메서드](#핵심-option-메서드)
+    - [Option과 Result 변환](#option과-result-변환)
+    - [Match로 분기 처리](#match로-분기-처리)
+    - [컬렉션 헬퍼](#컬렉션-헬퍼)
+    - [LINQ 통합](#linq-통합)
+  - [`NonEmpty<T>` 사용법](#nonemptyt-사용법)
+    - [NonEmpty 생성하기](#nonempty-생성하기)
+    - [NonEmpty 메서드](#nonempty-메서드)
+    - [사용 예시](#사용-예시)
   - [오류 코드와 진단](#오류-코드와-진단)
-  - [`NonEmpty<T>` — 최소 1개 보장 컬렉션](#nonemptyt--최소-1개-보장-컬렉션)
+    - [내장 ErrorCode](#내장-errorcode)
+    - [커스텀 ErrorCode](#커스텀-errorcode)
+    - [ErrorCode 속성](#errorcode-속성)
+    - [진단 정보 (Debug 모드)](#진단-정보-debug-모드)
 - [플루언트 파이프라인](#플루언트-파이프라인)
   - [분기 제어와 복구](#분기-제어와-복구)
   - [여러 결과 결합](#여러-결과-결합)
   - [컬렉션 & 순회](#컬렉션--순회)
-- [비동기 & UniTask 통합](#비동기--unitask-통합)
-- [회복력 유틸리티](#회복력-유틸리티)
+- [비동기 지원 (UniTask / Awaitable)](#비동기-지원-unitask--awaitable)
+- [복원력 유틸리티](#복원력-유틸리티)
 - [디버깅 & 가시성](#디버깅--가시성)
 - [성능 툴킷](#성능-툴킷)
 - [샘플 씬 & 테스트](#샘플-씬--테스트)
@@ -55,13 +75,225 @@ UniFP는 Rust과 Haskell, F# 영감을 받아, Unity 게임 로직에 함수형 
 
 ## 핵심 하이라이트
 
-- **`Result<T>` · `Option<T>` 구조체**로 힙 할당 없이 명시적 성공/실패, Null 안전을 구현합니다.
-- **레일웨이 스타일 확장 메서드** (`Then`, `Map`, `Filter`, `Recover`, `DoStrict`, `IfFailed` 등) 가독성 높은 파이프라인을 제공합니다.
-- **UniTask 기반 비동기 파이프라인**을 위한 `.ThenAsync`, `.MapAsync`, `.FilterAsync`, `AsyncResult.TryAsync()` 유틸리티를 제공합니다.
-- **ResultCombinators · 컬렉션 확장**으로 여러 결과를 결합하거나 리스트/Span을 순회하며 조건 검증을 수행할 수 있습니다.
+- **`Result<T>`와 `Option<T>` 구조체**는 힙 할당 없이 명시적인 성공/실패 및 null 안전성을 구현합니다.
+- **철도 스타일 확장 메서드**(`Then`, `Map`, `Filter`, `Recover`, `DoStrict`, `IfFailed` 등)를 통해 매우 읽기 쉬운 파이프라인을 제공합니다.
+- **UniTask와 Unity Awaitable 모두 지원**하는 비동기 파이프라인(`.ThenAsync`, `.MapAsync`, `.FilterAsync`, `AsyncResult.TryAsync()`)을 제공합니다.
+- **ResultCombinators와 컨렉션 확장**을 통해 여러 Result를 결합하거나 리스트/Span을 조건부 검증과 함께 순회할 수 있습니다.
 - **SafeExecutor 계측**으로 Editor/디버그 환경에서 연산 타입과 호출 위치를 자동으로 기록합니다.
 - **DelegateCache, ResultPool, SpanExtensions** 등 성능 중심 유틸리티로 고빈도 코드에서도 GC를 억제합니다.
 - **`Assets/Scenes` 데모와 `src/UniFP/Assets/Tests` 단위 테스트**를 통해 실제 사용 패턴을 바로 확인할 수 있습니다.
+
+## 다른 라이브러리와의 비교
+
+### UniFP vs Unity-NOPE
+
+#### 성능 비교
+
+NOPE의 성능문제를 개선했습니다.
+
+**1. Zero-GC 구조체 설계**
+- UniFP: 모든 핵심 타입이 `readonly struct`로 스택 할당됨
+- Unity-NOPE: `Result<T,E>`가 `readonly struct`지만, 제네릭 에러 타입 `E`가 박싱을 유발할 수 있음
+
+**2. 델리게이트 캐싱**
+- UniFP: `DelegateCache`로 자주 사용되는 람다 재사용 → 힙 할당 방지
+- Unity-NOPE: 델리게이트 캐싱 없음 → Update 루프에서 반복 생성
+
+**3. ResultPool & ListPool**
+- UniFP: 고빈도 시나리오를 위한 객체 풀링 내장
+- Unity-NOPE: 풀링 메커니즘 없음
+
+#### 기능 비교
+
+NOPE에 핵심적인 기능은 UniFP에도 구현되어있습니다. 다만 이름은 UniFP에서 C#사용자에 더 친숙하게 명명되었습니다.
+UniFP의 `Then` = NOPE의 `Bind`, UniFP의 `Filter` = NOPE의 `Ensure`
+
+**고수준 기능 비교**
+
+| 기능 | UniFP | Unity-NOPE |
+|------|-------|------------|
+| Result 모나드 | `Result<T>` (단일 타입) | `Result<T,E>` (타입화된 에러) |
+| Option 모나드 | `Option<T>` | `Maybe<T>` |
+| 비동기 지원 | UniTask + Awaitable | UniTask + Awaitable |
+| 에러 타입 | `ErrorCode` (구조체, 효율적) | `E` (제네릭, 유연하지만 박싱 가능) |
+| 파이프라인 연산 | Then, Map, Filter, Recover, Do... | Bind, Map, Ensure, Tap, Finally... |
+| 재시도 로직 | Retry, RetryWithBackoff, Repeat | 미지원 |
+| 결과 결합 | ResultCombinators (Combine, Zip...) | Result.Combine, CombineValues |
+| 컬렉션 순회 | SelectResults, CombineAll, Partition | 제한적 |
+| 성능 최적화 | DelegateCache, Pools, Span 확장 | 기본 구조체만 |
+| 디버깅 도구 | Trace, Breakpoint, SafeExecutor | 기본 Match만 |
+
+**메서드별 상세 비교**
+
+| 메서드 카테고리 | UniFP | Unity-NOPE | 설명 |
+|---------------|-------|------------|------|
+| **기본 변환** |
+| `Map` | ✅ | ✅ | 성공 시 값 변환 (T → U) |
+| `Bind` (Then) | ✅ `Then` | ✅ `Bind` | Result를 반환하는 함수 체이닝 (T → Result\<U\>) |
+| `Filter` | ✅ | ⚠️ `Ensure` | 조건부 검증 (조건 실패 시 Failure) |
+| **에러 처리** |
+| `MapError` | ⚠️ ErrorCode만 | ✅ | 에러 타입 변환 |
+| `Recover` | ✅ | ⚠️ `OrElse` | 실패를 기본값으로 복구 |
+| `IfFailed` | ✅ | ⚠️ `Or` | 실패 시 대체 Result 제공 |
+| `Catch` | ✅ | ❌ | 특정 에러를 가로채서 복구 |
+| **부수 효과** |
+| `Do` | ✅ | ⚠️ `Tap` | 성공 시 부수 효과 실행 (값 변경 없음) |
+| `DoStrict` | ✅ | ❌ | 부수 효과 실패 시 파이프라인 중단 |
+| `IfFailed(Action)` | ✅ | ❌ | 실패 시만 부수 효과 실행 |
+| **조건부 실행** |
+| `ThenIf` | ✅ | ❌ | 조건부 Then |
+| `MapIf` | ✅ | ❌ | 조건부 Map |
+| `Where` | ⚠️ Option에만 | ✅ Maybe에만 | 조건 필터링 |
+| **결과 검사** |
+| `Match` | ✅ | ✅ | 성공/실패에 따라 다른 함수 실행 |
+| `Finally` | ⚠️ `Match` 유사 | ✅ | 체인 종료 및 최종 처리 |
+| `Assert` | ✅ | ⚠️ `Ensure` 유사 | 조건 검증 (디버그용) |
+| **비동기 (UniTask/Awaitable)** |
+| `ThenAsync` | ✅ | ⚠️ `Bind` 오버로드 | 비동기 Result 체이닝 |
+| `MapAsync` | ✅ | ⚠️ `Map` 오버로드 | 비동기 값 변환 |
+| `FilterAsync` | ✅ | ❌ | 비동기 조건 검증 |
+| `DoAsync` | ✅ | ❌ | 비동기 부수 효과 |
+| `TryAsync` | ✅ | ⚠️ `Of` | 예외를 Result로 변환 (비동기) |
+| **복원력** |
+| `Retry` | ✅ | ❌ | 실패 시 재시도 |
+| `RetryAsync` | ✅ | ❌ | 비동기 재시도 |
+| `RetryWithBackoff` | ✅ | ❌ | 지수 백오프 재시도 |
+| `Repeat` | ✅ | ❌ | N번 연속 성공 필요 |
+| **결과 결합** |
+| `Combine` | ✅ | ✅ | 여러 Result 결합 |
+| `Zip` | ✅ | ⚠️ `CombineValues` | 여러 Result를 튜플로 결합 |
+| `CombineAll` | ✅ | ❌ | List\<Result\> → Result\<List\> |
+| `Partition` | ✅ | ❌ | 성공/실패 분리 |
+| **컬렉션 확장** |
+| `SelectResults` | ✅ | ❌ | 컬렉션 → List\<Result\>, 실패 시 중단 |
+| `FilterResults` | ✅ | ❌ | 조건부 필터링 + Result 반환 |
+| `Fold` | ✅ | ❌ | 컬렉션 집계 (Result 반환) |
+| `AggregateResults` | ✅ | ❌ | 복잡한 집계 로직 |
+| **생성 헬퍼** |
+| `Success` | ✅ | ✅ | 성공 Result 생성 |
+| `Failure` | ✅ | ✅ | 실패 Result 생성 |
+| `FromValue` | ✅ | ⚠️ implicit | 값에서 Result 생성 |
+| `SuccessIf` | ⚠️ `Filter` 유사 | ✅ | 조건부 성공/실패 생성 |
+| `FailureIf` | ⚠️ `Filter` 반대 | ✅ | 조건부 실패/성공 생성 |
+| `Of` | ⚠️ `Try` | ✅ | 예외 → Result 변환 |
+| **안전 연산** |
+| `BindSafe` | ❌ | ✅ | 예외 처리가 포함된 Bind |
+| `MapSafe` | ❌ | ✅ | 예외 처리가 포함된 Map |
+| `TapSafe` | ❌ | ✅ | 예외 처리가 포함된 Tap |
+| **디버깅** |
+| `Trace` | ✅ | ❌ | 파이프라인 단계 추적 |
+| `TraceWith` | ✅ | ❌ | 커스텀 메시지 추적 |
+| `TraceOnFailure` | ✅ | ❌ | 실패 시만 추적 |
+| `Breakpoint` | ✅ | ❌ | 디버거 중단점 설정 |
+
+**범례:**
+- ✅ 완전 지원
+- ⚠️ 부분 지원 또는 다른 이름으로 제공
+- ❌ 미지원
+
+#### 에러 타입화: 99%의 경우 불필요합니다
+
+Unity-NOPE는 `Result<T,E>`로 에러를 타입화할 수 있지만, Unity 게임 개발에서는 **대부분 오버엔지니어링**입니다:
+
+**왜 타입화된 에러가 불필요한가?**
+- Unity 게임 로직은 주로 "성공했나? 실패했나?"만 중요
+- 에러의 **종류**보다 **메시지**가 더 유용 (디버깅/로깅 시)
+- 타입화된 에러는 제네릭 파라미터 증가 → 코드 복잡도 상승
+- 대부분의 실패는 "리소스 로드 실패", "유효성 검사 실패" 등 단순한 범주
+
+**UniFP의 접근: ErrorCode 구조체**
+```csharp
+// UniFP: 효율적이고 명확한 에러 분류
+var result = LoadAsset()
+    .Filter(x => x != null, ErrorCode.NotFound)
+    .Then(ValidateAsset);  // ErrorCode.ValidationFailed 반환 가능
+
+if (result.IsFailure)
+{
+    Debug.LogError($"[{result.ErrorCode.Category}] {result.Error}");
+    // [Resource] Asset not found: player_model.prefab
+}
+```
+
+**1%의 경우: 타입 안전한 에러가 필요할 때**
+
+복잡한 도메인 로직에서 정말로 타입화된 에러가 필요하다면?
+
+```csharp
+// 방법 1: 커스텀 ErrorCode 사용
+public static class PaymentErrors
+{
+    public static readonly ErrorCode InsufficientFunds = ErrorCode.Custom(1001, "Payment");
+    public static readonly ErrorCode InvalidCard = ErrorCode.Custom(1002, "Payment");
+    public static readonly ErrorCode NetworkTimeout = ErrorCode.Custom(1003, "Payment");
+}
+
+var paymentResult = ProcessPayment()
+    .Recover(code => code == PaymentErrors.NetworkTimeout 
+        ? RetryPayment() 
+        : RefundUser());
+
+// 방법 2: 판별된 유니온 패턴 (C# 9.0+)
+public record PaymentError
+{
+    public record InsufficientFunds(decimal Required, decimal Available) : PaymentError;
+    public record InvalidCard(string CardNumber) : PaymentError;
+    public record NetworkTimeout(int Attempts) : PaymentError;
+}
+
+// Result의 Error 메시지에 직렬화하여 저장
+var result = payment switch
+{
+    PaymentError.InsufficientFunds e => 
+        Result<Payment>.Failure(ErrorCode.Custom(1001, "Payment"), 
+                                $"부족: {e.Required - e.Available}원"),
+    // ...
+};
+```
+
+---
+
+### UniFP vs language-ext
+
+#### 왜 language-ext를 Unity에 바로 쓰지 않는가?
+
+language-ext는 .NET 생태계 최고의 함수형 라이브러리이지만, Unity에는 적합하지 않습니다
+
+**1. Unity 런타임 최적화 부재**
+- language-ext는 범용 .NET을 위해 설계됨
+- 많은 타입이 클래스 기반 → GC 압박 증가
+- Unity의 IL2CPP AOT 컴파일과 호환성 이슈 가능
+
+**2. 압도적인 기능 복잡도**
+- 100개 이상의 모나드와 트랜스포머
+- Higher-kinded types 시뮬레이션 (복잡한 제네릭 패턴)
+- 게임 개발에 불필요한 Parsec, Lenses, Free monads 등
+
+**3. 학습 곡선**
+- Haskell 스타일 명명 규칙 (`camelCase` 정적 함수)
+- Trait 시스템의 복잡한 추상화
+- Unity 개발자에게 낯선 함수형 개념 과다
+
+**4. 성능 오버헤드**
+- 고도의 추상화로 인한 간접 호출
+- Unity 프로파일러에서 핫패스 식별 어려움
+
+#### 기능 비교
+
+| 분류 | language-ext | UniFP | Unity 게임 개발 관점 |
+|------|--------------|-------|---------------------|
+| **핵심 모나드** | Option, Either, Try, Validation, Fin | Result, Option, NonEmpty | UniFP가 Unity에 특화된 최소 집합 제공 ✅ |
+| **불변 컬렉션** | Arr, Lst, Seq, Map, HashMap, Set... | 기본 C# 컬렉션 + 확장 메서드 | language-ext 우수하나 Unity에는 과다 ⚠️ |
+| **비동기** | IO monad, Eff, Pipes, StreamT | AsyncResult (UniTask/Awaitable) | UniFP가 Unity 생태계 통합 우수 ✅ |
+| **에러 처리** | Either<L,R>, Validation<E,S>, Fin<A> | Result<T> + ErrorCode | UniFP가 단순하고 명확 ✅ |
+| **파서 컴비네이터** | Parsec (완전 구현) | 미지원 | 게임에 불필요 (language-ext 승) ❌ |
+| **Lenses & Optics** | 완전 지원 | 미지원 | 게임에 과다 (언리얼 FProperty 등이 더 적합) ❌ |
+| **Atomic 동시성** | Atom, Ref, AtomHashMap | 미지원 | Unity는 단일 스레드 중심, 필요 시 C# 표준 사용 ⚠️ |
+| **성능** | 고도 추상화로 오버헤드 | Zero-GC 구조체, 풀링 최적화 | UniFP가 Unity에 최적화 ✅ |
+| **학습 곡선** | 가파름 (Haskell 배경 필요) | 완만함 (C# LINQ 경험만으로 시작 가능) | UniFP가 접근성 우수 ✅ |
+
+
+---
 
 ## 시작하기
 
@@ -90,17 +322,32 @@ UniFP는 Rust과 Haskell, F# 영감을 받아, Unity 게임 로직에 함수형 
 
 `src/UniFP/Assets/Plugins/UniFP` 디렉터리를 프로젝트의 `Assets/Plugins/UniFP` 아래로 복사합니다. `UniFP.asmdef`를 포함해야 Unity 빌드 타임이 빠르게 유지됩니다.
 
-### 의존성
+### 선택적 의존성
 
-UniFP는 **UniTask**를 필요로 합니다. UPM 설치 시 자동으로 설치되지만, 수동 설치 시에는 별도로 설치해야 합니다:
+UniFP는 독립적으로 작동하지만, 다음 중 하나를 설치하면 비동기 기능을 향상시킬 수 있습니다:
 
-```text
-https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask
-```
+**옵션 1: UniTask** (Unity 2020.3+ 권장)
+- Unity Awaitable보다 더 많은 기능과 우수한 성능
+- UPM 설치:
+  ```text
+  https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask
+  ```
+- `AsyncResult.ThenAsync`, `MapAsync`, `FilterAsync`, `DoAsync`, `TryAsync` 활성화
+
+**옵션 2: Unity Awaitable** (Unity 6.0+)
+- Unity 6.0+에 내장, 별도 설치 불필요
+- UniFP.asmdef의 `versionDefines`를 통해 자동 감지
+- UniTask와 동일한 비동기 API 제공
+
+**비동기 지원 없이:**
+- 모든 동기 `Result<T>` 기능은 완벽하게 작동
+- 비동기 확장 메서드는 사용 불가
 
 ## 핵심 개념
 
-### `Result<T>` — **if/else와 try/catch 지옥**에서 해방 🔥🔥🔥 
+### `Result<T>` 사용법
+
+`Result<T>`는 **성공**(Success) 또는 **실패**(Failure)를 타입으로 표현하여 if/else와 try/catch 지옥에서 해방시켜줍니다.
 
 혹시 이런 코드를 본 적 있나요? if 안에 try가 있고, 그 안에 또 if-else가 있는 코드...
 성공 로직, 실패 로직, 예외 처리, 기본값 할당이 스파게티처럼 얽혀있어 어디서부터 읽어야 할지 막막합니다. 새로운 검증 로직 하나를 추가하는 순간, 지옥은 점점 더 깊어지고 결국 아무도 건드리고 싶지 않은 코드가 탄생하죠.
@@ -195,8 +442,132 @@ public class LoginSample : MonoBehaviour
 - 실패 시 자동으로 `Recover` 분기로 이동하므로 예외와 기본 값 복구 로직이 분류됩니다.
 - 추가 검증이나 비동기 호출도 `Then`, `Filter`, `ThenAsync` 등을 통해 쉽게 확장할 수 있습니다.
 
+#### Result 생성하기
 
-### `Option<T>` — **Null지옥**에서 해방 🔥🔥🔥 
+```csharp
+using UniFP;
+
+// 1. Success / Failure로 직접 생성
+var success = Result<int>.Success(42);
+var failure = Result<int>.Failure(ErrorCode.NotFound);
+var failureWithMsg = Result<int>.Failure(ErrorCode.ValidationFailed, "나이는 0보다 커야 합니다");
+
+// 2. FromValue로 값을 Result로 승격
+var fromValue = Result.FromValue(userId);
+
+// 3. Try로 예외를 Result로 변환
+var parseResult = Result.Try(() => int.Parse(input));
+var parseWithCode = Result.Try(() => int.Parse(input), ErrorCode.InvalidInput);
+```
+
+#### 핵심 메서드: Then, Map, Filter
+
+```csharp
+// Then: Result<T>를 반환하는 함수 체이닝
+Result<User> LoadUser(int id) => /* ... */;
+var result = Result.FromValue(42)
+    .Then(LoadUser);  // int -> Result<User>
+
+// Map: 일반 값을 반환하는 함수 변환
+var doubled = Result.FromValue(10)
+    .Map(x => x * 2);  // int -> int (자동으로 Result<int>로 래핑)
+
+// Filter: 조건 검증 (조건 실패 시 Failure)
+var validated = Result.FromValue(age)
+    .Filter(x => x >= 18, ErrorCode.ValidationFailed, "성인만 가능합니다");
+```
+
+> **💡 Tip: Then vs Map**
+> - `Then`은 Result를 반환하는 함수에 사용 (실패할 수 있는 연산)
+> - `Map`은 일반 값을 반환하는 함수에 사용 (단순 변환)
+
+#### 에러 처리 및 복구
+
+```csharp
+// Recover: 실패를 기본값으로 복구
+var withDefault = LoadConfig()
+    .Recover(code => DefaultConfig);
+
+// IfFailed: 실패 시 대체 파이프라인 실행
+var cached = LoadFromServer()
+    .IfFailed(() => LoadFromCache());
+
+// Catch: 특정 에러만 가로채서 복구
+var result = LoadResource()
+    .Catch(ErrorCode.NotFound, () => CreateDefault());
+
+// Match: 성공/실패에 따라 다른 처리
+result.Match(
+    onSuccess: user => Debug.Log($"환영합니다, {user.Name}"),
+    onFailure: code => Debug.LogError($"로드 실패: {code}"));
+```
+
+#### 부수 효과 (Side Effects)
+
+```csharp
+// Do: 성공 시만 부수 효과 실행 (실패 시 스킵)
+var result = LoadUser(id)
+    .Do(user => Analytics.Track("UserLoaded", user.Id))
+    .Do(user => Debug.Log($"로드됨: {user.Name}"));
+
+// DoStrict: 부수 효과가 실패하면 파이프라인 중단
+var saved = CreateUser(data)
+    .DoStrict(user => SaveToDatabase(user));  // DB 저장 실패 시 전체 실패
+
+// IfFailed: 실패 시만 부수 효과 실행
+var result = Process()
+    .IfFailed(code => Debug.LogError($"처리 실패: {code}"));
+```
+
+#### 조건부 실행
+
+```csharp
+// ThenIf / MapIf: 조건에 따라 선택적으로 변환
+var result = LoadUser(id)
+    .ThenIf(
+        condition: user => user.IsPremium,
+        thenFunc: user => LoadPremiumData(user),
+        elseFunc: user => Result<UserData>.Success(user.BasicData));
+
+var processed = Result.FromValue(input)
+    .MapIf(
+        condition: x => x > 100,
+        thenFunc: x => x / 2,
+        elseFunc: x => x);
+```
+
+#### 비동기 Result (UniTask / Awaitable)
+
+```csharp
+using Cysharp.Threading.Tasks;  // 또는 using UnityEngine; (Awaitable)
+
+// ThenAsync: 비동기 Result 체이닝
+async UniTask<Result<User>> LoadUserAsync(int id)
+{
+    return await Result.FromValue(id)
+        .Filter(x => x > 0, ErrorCode.InvalidInput)
+        .ThenAsync(async id => await FetchFromAPI(id))
+        .MapAsync(json => ParseUser(json))
+        .FilterAsync(user => UniTask.FromResult(user.IsActive), "비활성 사용자");
+}
+
+// TryAsync: 예외를 던지는 비동기 작업을 Result로 변환
+var result = await AsyncResult.TryAsync(async () => 
+{
+    var response = await httpClient.GetAsync(url);
+    return await response.Content.ReadAsStringAsync();
+}, ErrorCode.NetworkError);
+
+// DoAsync: 비동기 부수 효과
+var saved = await LoadUser(id)
+    .DoAsync(async user => await SaveToCloud(user));
+```
+
+---
+
+### `Option<T>` 사용법
+
+`Option<T>`는 **값이 있음**(Some) 또는 **값이 없음**(None)을 타입으로 표현하여 null 지옥에서 해방시켜줍니다. 
 
 Unity 프로젝트를 하다 보면 `null` 체크만 수십 줄인 코드와 마주칠 때가 있습니다.
 `if (foo == null)` → `else if (foo.Bar == null)` → `else if (foo.Bar.Length == 0)` …
@@ -265,14 +636,294 @@ public class UserProfileLoader
 - `Filter` 조건을 추가하는 것만으로 새로운 검증 로직을 안전하게 덧붙일 수 있습니다.
 - 마지막에 `Match` 한 번이면 정상/기본 흐름이 또렷하게 분리됩니다.
 
-### `NonEmpty<T>` — 최소 1개 보장 컬렉션
-
-비어 있을 수 없는 컬렉션이 필요할 때 사용합니다. 파티 구성, 필수 슬롯과 같은 도메인에 적합합니다.
+#### Option 생성하기
 
 ```csharp
-var squad = NonEmpty.Create("Leader", "Support", "Tank");
-var upper = squad.Map(role => role.ToUpperInvariant());
+using UniFP;
+
+// 1. Some / None으로 직접 생성
+var some = Option<int>.Some(42);
+var none = Option<int>.None();
+
+// 2. From으로 nullable 값을 Option으로 변환 (null이면 None)
+var fromValue = Option<string>.From(PlayerPrefs.GetString("username"));  // null이면 None
+var fromNullable = Option<int>.From(nullableInt);
+
+// 3. Where로 조건부 변환 (조건 실패 시 None)
+var adult = Option<int>.From(age)
+    .Where(x => x >= 18);
 ```
+
+#### 핵심 Option 메서드
+
+```csharp
+// Map: 값 변환 (None이면 스킵)
+var doubled = Option<int>.Some(10)
+    .Map(x => x * 2);  // Some(20)
+
+var stillNone = Option<int>.None()
+    .Map(x => x * 2);  // None
+
+// Bind: Option을 반환하는 함수 체이닝
+Option<User> FindUser(string name) => /* ... */;
+var user = Option<string>.From(username)
+    .Bind(FindUser);
+
+// Filter: 조건 검증 (실패 시 None)
+var valid = Option<int>.From(input)
+    .Filter(x => x > 0)
+    .Filter(x => x < 100);
+
+// Or / OrElse: None일 때 대체값 제공
+var withDefault = Option<string>.None()
+    .Or(Option<string>.Some("기본값"));
+
+var fromFunc = Option<int>.None()
+    .OrElse(() => Option<int>.Some(GetDefaultValue()));
+
+// GetValueOrDefault: Option에서 값 추출
+var value = someOption.GetValueOrDefault(defaultValue);
+var valueOrNull = someOption.GetValueOrDefault();
+```
+
+#### Option과 Result 변환
+
+```csharp
+// Option -> Result: None을 에러로 변환
+var result = Option<User>.From(FindUser(id))
+    .ToResult(ErrorCode.NotFound, "사용자를 찾을 수 없습니다");
+
+// Result -> Option: 실패를 None으로 변환 (에러 무시)
+var option = LoadConfig()
+    .ToOption();  // 성공 -> Some, 실패 -> None
+```
+
+#### Match로 분기 처리
+
+```csharp
+// Match: Some/None에 따라 다른 처리
+var message = Option<User>.From(user).Match(
+    onSome: u => $"환영합니다, {u.Name}",
+    onNone: () => "게스트 모드");
+
+// IfSome / IfNone: 한쪽 케이스만 처리
+Option<Config>.From(config)
+    .IfSome(c => ApplyConfig(c))
+    .IfNone(() => UseDefaults());
+```
+
+#### 컬렉션 헬퍼
+
+```csharp
+using System.Linq;
+
+var items = new[] { 1, 2, 3, 4, 5 };
+
+// TryFirst / TryLast: 첫/마지막 요소를 Option으로
+var first = items.TryFirst();  // Some(1)
+var firstEven = items.TryFirst(x => x % 2 == 0);  // Some(2)
+var empty = Array.Empty<int>().TryFirst();  // None
+
+// TryFind: 조건에 맞는 요소 찾기
+var found = items.TryFind(x => x > 3);  // Some(4)
+
+// Choose: Option 컬렉션에서 Some만 추출
+var options = new[] 
+{ 
+    Option<int>.Some(1), 
+    Option<int>.None(), 
+    Option<int>.Some(3) 
+};
+var values = options.Choose();  // [1, 3]
+```
+
+#### LINQ 통합
+
+```csharp
+using System.Linq;
+
+// Select: Map과 동일
+var doubled = Option<int>.Some(10)
+    .Select(x => x * 2);  // Some(20)
+
+// Where: Filter와 동일
+var filtered = Option<int>.Some(42)
+    .Where(x => x > 18);  // Some(42)
+
+// SelectMany: Bind와 동일 (LINQ 쿼리 구문 지원)
+var result = 
+    from name in Option<string>.From(username)
+    from user in FindUser(name)
+    from profile in LoadProfile(user.Id)
+    select profile;
+```
+
+---
+
+### `NonEmpty<T>` 사용법
+
+`NonEmpty<T>`는 **최소 1개의 요소**를 보장하는 컬렉션입니다. 파티 구성, 필수 슬롯 등 비어있으면 안 되는 도메인에 적합합니다.
+
+#### NonEmpty 생성하기
+
+```csharp
+using UniFP;
+
+// Create: 최소 1개 요소로 생성
+var squad = NonEmpty.Create("Leader", "Support", "Tank");
+var single = NonEmpty.Create(42);
+
+// FromList: 리스트에서 변환 (비어있으면 실패)
+var list = new List<string> { "A", "B", "C" };
+var nonEmpty = NonEmpty.FromList(list);  // Result<NonEmpty<string>>
+
+var emptyList = new List<string>();
+var failed = NonEmpty.FromList(emptyList);  // Failure (비어있음)
+```
+
+#### NonEmpty 메서드
+
+```csharp
+// Head / Tail: 첫 요소와 나머지
+var squad = NonEmpty.Create("Leader", "Tank", "Healer");
+var leader = squad.Head;  // "Leader" (항상 존재)
+var others = squad.Tail;  // ["Tank", "Healer"] (IEnumerable)
+
+// Map: 모든 요소 변환
+var upper = squad.Map(role => role.ToUpper());  // NonEmpty<string>
+
+// Append / Prepend: 요소 추가
+var expanded = squad.Append("Mage");  // NonEmpty (여전히 최소 1개)
+var withNewLeader = squad.Prepend("NewLeader");
+
+// ToList / ToArray: 일반 컬렉션으로 변환
+var list = squad.ToList();
+var array = squad.ToArray();
+```
+
+#### 사용 예시
+
+```csharp
+// 파티 시스템: 최소 1명의 리더 필수
+public class Party
+{
+    private readonly NonEmpty<Player> _members;
+
+    public Party(Player leader, params Player[] others)
+    {
+        _members = NonEmpty.Create(leader, others);
+    }
+
+    public Player Leader => _members.Head;
+    public IEnumerable<Player> AllMembers => _members;
+
+    public void Buff()
+    {
+        // 컴파일 타임에 최소 1명 보장
+        _members.Map(p => p.ApplyBuff());
+    }
+}
+
+// 설정: 최소 1개의 서버 주소 필수
+var servers = NonEmpty.Create(
+    "https://primary.server.com",
+    "https://backup1.server.com",
+    "https://backup2.server.com"
+);
+
+var primary = servers.Head;
+var fallbacks = servers.Tail;
+```
+
+---
+
+### 오류 코드와 진단
+
+UniFP는 `ErrorCode` 구조체로 **Zero-GC 에러 분류**를 제공합니다.
+
+#### 내장 ErrorCode
+
+```csharp
+// 0-999: UniFP 예약 범위
+ErrorCode.None              // 0: 에러 없음
+ErrorCode.Unknown           // 1: 알 수 없는 에러
+ErrorCode.InvalidInput      // 100: 잘못된 입력
+ErrorCode.ValidationFailed  // 101: 검증 실패
+ErrorCode.NotFound          // 102: 찾을 수 없음
+ErrorCode.Unauthorized      // 103: 인증 필요
+ErrorCode.OperationFailed   // 104: 작업 실패
+ErrorCode.Timeout           // 105: 시간 초과
+ErrorCode.NetworkError      // 106: 네트워크 오류
+ErrorCode.Forbidden         // 107: 권한 없음
+ErrorCode.InvalidOperation  // 108: 유효하지 않은 작업
+```
+
+#### 커스텀 ErrorCode
+
+```csharp
+// 1000+: 사용자 정의 에러 코드
+public static class GameErrors
+{
+    public static readonly ErrorCode InsufficientGold = 
+        ErrorCode.Custom(1001, "Economy");
+    
+    public static readonly ErrorCode InventoryFull = 
+        ErrorCode.Custom(1002, "Inventory");
+    
+    public static readonly ErrorCode QuestNotAvailable = 
+        ErrorCode.Custom(1003, "Quest");
+}
+
+// 사용 예시
+var result = PurchaseItem(itemId, price)
+    .Filter(success => player.Gold >= price, GameErrors.InsufficientGold, 
+            $"골드 부족: {price - player.Gold} 더 필요");
+```
+
+#### ErrorCode 속성
+
+```csharp
+var error = ErrorCode.NotFound;
+
+error.Code;       // 102
+error.Category;   // "Resource"
+error.IsCustom;   // false (내장 코드)
+
+var custom = ErrorCode.Custom(2001, "Payment");
+custom.Code;      // 2001
+custom.Category;  // "Payment"
+custom.IsCustom;  // true
+```
+
+#### 진단 정보 (Debug 모드)
+
+```csharp
+// Editor 또는 UNIFP_DEBUG 환경에서 자동 기록
+var result = LoadAsset(path)
+    .Filter(asset => asset != null, ErrorCode.NotFound);
+
+if (result.IsFailure)
+{
+    // 실패 시 자동으로 기록된 정보
+    Debug.LogError($"[{result.ErrorCode.Category}] {result.Error}");
+    Debug.LogError($"발생 위치: {result.FilePath}:{result.LineNumber}");
+    Debug.LogError($"메서드: {result.MemberName}");
+    Debug.LogError($"연산 타입: {result.OperationType}");
+    
+    // 출력 예시:
+    // [Resource] Asset not found: player_model.prefab
+    // 발생 위치: Assets/Scripts/AssetLoader.cs:42
+    // 메서드: LoadPlayerModel
+    // 연산 타입: Filter
+}
+```
+
+---
+
+## 플루언트 파이프라인
+```
+
+---
 
 ## 플루언트 파이프라인
 
@@ -315,11 +966,14 @@ var snapshot = stats.Zip(
 - `FilterResults`, `Partition`, `Fold`, `AggregateResults` 등으로 리스트 검증과 집계를 수행합니다.
 - `SpanExtensions`는 `Span<T>` 기반 연산으로 Burst 민감 코드에서도 추가 할당 없이 동작합니다.
 
-## 비동기 & UniTask 통합
+## 비동기 지원 (UniTask / Awaitable)
 
-UniTask와 Result 파이프라인을 자연스럽게 결합합니다.
+UniFP는 **UniTask**(권장) 및 **Unity Awaitable**(Unity 6.0+) 모두에서 비동기 작업을 지원합니다.
 
+**UniTask 설치 시:**
 ```csharp
+using Cysharp.Threading.Tasks;
+
 async UniTask<Result<PlayerData>> FetchPlayer(int id)
 {
     return await Result.TryFromResult(() => ValidateId(id))
@@ -327,13 +981,30 @@ async UniTask<Result<PlayerData>> FetchPlayer(int id)
         .MapAsync(payload => payload.ToPlayerData())
         .FilterAsync(data => UniTask.FromResult(data.IsActive), "활성화된 플레이어가 아닙니다");
 }
+```
+
+**Unity 6.0+ (Awaitable) 사용 시:**
+```csharp
+using UnityEngine;
+
+async Awaitable<Result<PlayerData>> FetchPlayer(int id)
+{
+    return await Result.TryFromResult(() => ValidateId(id))
+        .ThenAsync(async _ => await Api.GetPlayer(id))
+        .MapAsync(payload => payload.ToPlayerData())
+        .FilterAsync(data => Awaitable.FromResult(data.IsActive), "활성화된 플레이어가 아닙니다");
+}
+```
+
+두 방식 모두 동일한 API를 제공합니다 - 비동기 타입만 바꾸면 됩니다!
+}
 
 var cached = await FetchPlayer(42).DoAsync(data => Cache.Save(data));
 ```
 
 예외를 던지는 비동기 작업은 `AsyncResult.TryAsync`로 감싸면 자동으로 `Result` 실패로 변환됩니다.
 
-## 회복력 유틸리티
+## 복원력 유틸리티
 
 - `Retry`, `RetryAsync`는 지정된 횟수만큼 재시도를 수행합니다.
 - `RetryWithBackoff`는 지수 백오프 지연을 적용해 불안정한 서비스를 다룹니다.

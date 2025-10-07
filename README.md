@@ -1,6 +1,12 @@
 ![C# Functional Programming for Unity Capsule Header](https://capsule-render.vercel.app/api?type=waving&height=220&color=0:5A2BFF,100:1FB5E9&text=C%23%20Functional%20Programming%20for%20Unity&fontAlign=50&fontAlignY=40&fontSize=46&fontColor=FFFFFF&desc=UniFP&descAlign=50&descAlignY=65&descSize=24)
 
-[English](./README.md) · [한국어](./README.ko.md) · [简体中文](./README.zh-CN.md)
+[English](./README.md) ·### Manual Installation
+
+Copy the `src/UniFP/Assets/Plugins/UniFP` directory to your project under `Assets/Plugins/UniFP`. Include `UniFP.asmdef` to keep Unity build times fast.
+
+### Optional Dependencies
+
+UniFP works standalone, but you can enhance async functionality by installing one of the following:/README.ko.md) · [简体中文](./README.zh-CN.md) · [日本語](./README.ja.md)
 
 # UniFP — C# Functional Programming for Unity
 
@@ -29,20 +35,40 @@ UniFP was developed as a lightweight alternative optimized for real-time applica
 ## Table of Contents
 
 - [Core Highlights](#core-highlights)
+- [Comparing with Other Libraries](#comparing-with-other-libraries)
 - [Getting Started](#getting-started)
   - [UPM Installation (Recommended)](#upm-installation-recommended)
   - [Manual Installation](#manual-installation)
-  - [Dependencies](#dependencies)
+  - [Optional Dependencies](#optional-dependencies)
 - [Core Concepts](#core-concepts)
-  - [`Result<T>` — Escape the if/else and try/catch Hell 🔥🔥🔥](#resultt--escape-the-ifelse-and-trycatch-hell-)
-  - [`Option<T>` — Escape the Null Hell 🔥🔥🔥](#optiont--escape-the-null-hell-)
+  - [`Result<T>` Usage](#resultt-usage)
+    - [Creating a Result](#creating-a-result)
+    - [Core Methods: Then, Map, Filter](#core-methods-then-map-filter)
+    - [Error Handling and Recovery](#error-handling-and-recovery)
+    - [Side Effects](#side-effects)
+    - [Conditional Execution](#conditional-execution)
+    - [Async Result (UniTask / Awaitable)](#async-result-unitask--awaitable)
+  - [`Option<T>` Usage](#optiont-usage)
+    - [Creating an Option](#creating-an-option)
+    - [Core Option Methods](#core-option-methods)
+    - [Option and Result Conversion](#option-and-result-conversion)
+    - [Branching with Match](#branching-with-match)
+    - [Collection Helpers](#collection-helpers)
+    - [LINQ Integration](#linq-integration)
+  - [`NonEmpty<T>` Usage](#nonemptyt-usage)
+    - [Creating a NonEmpty](#creating-a-nonempty)
+    - [NonEmpty Methods](#nonempty-methods)
+    - [Usage Examples](#usage-examples)
   - [Error Codes and Diagnostics](#error-codes-and-diagnostics)
-  - [`NonEmpty<T>` — Collections Guaranteed to Have at Least One Item](#nonemptyt--collections-guaranteed-to-have-at-least-one-item)
+    - [Built-in ErrorCode](#built-in-errorcode)
+    - [Custom ErrorCode](#custom-errorcode)
+    - [ErrorCode Properties](#errorcode-properties)
+    - [Diagnostic Information (Debug Mode)](#diagnostic-information-debug-mode)
 - [Fluent Pipelines](#fluent-pipelines)
   - [Branching Control and Recovery](#branching-control-and-recovery)
   - [Combining Multiple Results](#combining-multiple-results)
   - [Collections & Traversal](#collections--traversal)
-- [Async & UniTask Integration](#async--unitask-integration)
+- [Async Support (UniTask / Awaitable)](#async-support-unitask--awaitable)
 - [Resilience Utilities](#resilience-utilities)
 - [Debugging & Observability](#debugging--observability)
 - [Performance Toolkit](#performance-toolkit)
@@ -57,11 +83,227 @@ UniFP was developed as a lightweight alternative optimized for real-time applica
 
 - **`Result<T>` and `Option<T>` structs** implement explicit success/failure and null safety without heap allocation.
 - **Railway-style extension methods** (`Then`, `Map`, `Filter`, `Recover`, `DoStrict`, `IfFailed`, etc.) provide highly readable pipelines.
-- **UniTask-based async pipelines** with `.ThenAsync`, `.MapAsync`, `.FilterAsync`, and `AsyncResult.TryAsync()` utilities.
+- **Async support for both UniTask and Unity Awaitable** with `.ThenAsync`, `.MapAsync`, `.FilterAsync`, and `AsyncResult.TryAsync()` utilities.
 - **ResultCombinators and collection extensions** for combining multiple results or traversing lists/Span with conditional validation.
 - **SafeExecutor instrumentation** automatically records operation types and call locations in Editor/debug environments.
 - **Performance-focused utilities** like DelegateCache, ResultPool, and SpanExtensions suppress GC even in high-frequency code.
 - **`Assets/Scenes` demos and `src/UniFP/Assets/Tests` unit tests** showcase real usage patterns you can verify immediately.
+
+## Comparing with Other Libraries
+
+### UniFP vs Unity-NOPE
+
+#### Performance Comparison
+
+UniFP prioritizes performance.
+
+**1. Zero-GC Struct Design**
+- UniFP: All core types are `readonly struct` with stack allocation
+- Unity-NOPE: `Result<T,E>` is a `readonly struct`, but generic error type `E` may cause boxing
+
+**2. Delegate Caching**
+- UniFP: `DelegateCache` reuses frequently-used lambdas → Prevents heap allocation
+- Unity-NOPE: No delegate caching → Repeated creation in Update loops
+
+**3. ResultPool & ListPool**
+- UniFP: Built-in object pooling for high-frequency scenarios
+- Unity-NOPE: No pooling mechanism
+
+#### Feature Comparison
+
+NOPE's core features are also implemented in UniFP. However, UniFP uses naming more familiar to C# users.
+UniFP's `Then` = NOPE's `Bind`, UniFP's `Filter` = NOPE's `Ensure`
+
+**High-Level Feature Comparison**
+
+| Feature | UniFP | Unity-NOPE |
+|---------|-------|------------|
+| Result Monad | `Result<T>` (single type) | `Result<T,E>` (typed errors) |
+| Option Monad | `Option<T>` | `Maybe<T>` |
+| Async Support | UniTask + Awaitable | UniTask + Awaitable |
+| Error Type | `ErrorCode` (struct, efficient) | `E` (generic, flexible but may box) |
+| Pipeline Operations | Then, Map, Filter, Recover, Do... | Bind, Map, Ensure, Tap, Finally... |
+| Retry Logic | Retry, RetryWithBackoff, Repeat | Not supported |
+| Result Combining | ResultCombinators (Combine, Zip...) | Result.Combine, CombineValues |
+| Collection Traversal | SelectResults, CombineAll, Partition | Limited |
+| Performance Optimizations | DelegateCache, Pools, Span extensions | Basic structs only |
+| Debugging Tools | Trace, Breakpoint, SafeExecutor | Basic Match only |
+
+**Detailed Method Comparison**
+
+| Method Category | UniFP | Unity-NOPE | Description |
+|----------------|-------|------------|-------------|
+| **Basic Transformations** |
+| `Map` | ✅ | ✅ | Transform value on success (T → U) |
+| `Bind` (Then) | ✅ `Then` | ✅ `Bind` | Chain Result-returning functions (T → Result\<U\>) |
+| `Filter` | ✅ | ⚠️ `Ensure` | Conditional validation (fail to Failure) |
+| **Error Handling** |
+| `MapError` | ⚠️ ErrorCode only | ✅ | Transform error type |
+| `Recover` | ✅ | ⚠️ `OrElse` | Recover failure with default value |
+| `IfFailed` | ✅ | ⚠️ `Or` | Provide alternative Result on failure |
+| `Catch` | ✅ | ❌ | Intercept specific error for recovery |
+| **Side Effects** |
+| `Do` | ✅ | ⚠️ `Tap` | Execute side effect on success (no value change) |
+| `DoStrict` | ✅ | ❌ | Abort pipeline if side effect fails |
+| `IfFailed(Action)` | ✅ | ❌ | Execute side effect only on failure |
+| **Conditional Execution** |
+| `ThenIf` | ✅ | ❌ | Conditional Then |
+| `MapIf` | ✅ | ❌ | Conditional Map |
+| `Where` | ⚠️ Option only | ✅ Maybe only | Conditional filtering |
+| **Result Inspection** |
+| `Match` | ✅ | ✅ | Execute different functions based on success/failure |
+| `Finally` | ⚠️ Similar to `Match` | ✅ | Terminate chain and final processing |
+| `Assert` | ✅ | ⚠️ Similar to `Ensure` | Condition validation (debug) |
+| **Async (UniTask/Awaitable)** |
+| `ThenAsync` | ✅ | ⚠️ `Bind` overload | Async Result chaining |
+| `MapAsync` | ✅ | ⚠️ `Map` overload | Async value transformation |
+| `FilterAsync` | ✅ | ❌ | Async conditional validation |
+| `DoAsync` | ✅ | ❌ | Async side effects |
+| `TryAsync` | ✅ | ⚠️ `Of` | Convert exceptions to Result (async) |
+| **Resilience** |
+| `Retry` | ✅ | ❌ | Retry on failure |
+| `RetryAsync` | ✅ | ❌ | Async retry |
+| `RetryWithBackoff` | ✅ | ❌ | Exponential backoff retry |
+| `Repeat` | ✅ | ❌ | Require N consecutive successes |
+| **Result Combining** |
+| `Combine` | ✅ | ✅ | Combine multiple Results |
+| `Zip` | ✅ | ⚠️ `CombineValues` | Combine Results into tuple |
+| `CombineAll` | ✅ | ❌ | List\<Result\> → Result\<List\> |
+| `Partition` | ✅ | ❌ | Separate successes/failures |
+| **Collection Extensions** |
+| `SelectResults` | ✅ | ❌ | Collection → List\<Result\>, abort on failure |
+| `FilterResults` | ✅ | ❌ | Conditional filtering + Result |
+| `Fold` | ✅ | ❌ | Aggregate collection (return Result) |
+| `AggregateResults` | ✅ | ❌ | Complex aggregation logic |
+| **Creation Helpers** |
+| `Success` | ✅ | ✅ | Create success Result |
+| `Failure` | ✅ | ✅ | Create failure Result |
+| `FromValue` | ✅ | ⚠️ implicit | Create Result from value |
+| `SuccessIf` | ⚠️ Similar to `Filter` | ✅ | Conditional success/failure creation |
+| `FailureIf` | ⚠️ Opposite of `Filter` | ✅ | Conditional failure/success creation |
+| `Of` | ⚠️ `Try` | ✅ | Exception → Result conversion |
+| **Safe Operations** |
+| `BindSafe` | ❌ | ✅ | Bind with exception handling |
+| `MapSafe` | ❌ | ✅ | Map with exception handling |
+| `TapSafe` | ❌ | ✅ | Tap with exception handling |
+| **Debugging** |
+| `Trace` | ✅ | ❌ | Trace pipeline steps |
+| `TraceWith` | ✅ | ❌ | Trace with custom message |
+| `TraceOnFailure` | ✅ | ❌ | Trace only on failure |
+| `Breakpoint` | ✅ | ❌ | Set debugger breakpoint |
+
+**Legend:**
+- ✅ Fully supported
+- ⚠️ Partially supported or provided under different name
+- ❌ Not supported
+
+**Key Differences:**
+1. **UniFP**: More resilience utilities (Retry, Repeat), debugging tools, collection extensions
+2. **Unity-NOPE**: Safe-series methods (built-in exception handling), more flexible MapError with typed errors
+3. **Naming differences**: UniFP's `Then` = NOPE's `Bind`, UniFP's `Filter` = NOPE's `Ensure`
+
+#### Error Typing: Unnecessary for 99% of Cases
+
+Unity-NOPE can type errors with `Result<T,E>`, but in Unity game development, this is **usually over-engineering**:
+
+**Why are typed errors unnecessary?**
+- Unity game logic mainly cares about "Did it succeed? Did it fail?"
+- Error **message** is more useful than error **type** (for debugging/logging)
+- Typed errors increase generic parameters → Code complexity increases
+- Most failures fall into simple categories like "resource load failed", "validation failed"
+
+**UniFP's Approach: ErrorCode Struct**
+```csharp
+// UniFP: Efficient and clear error classification
+var result = LoadAsset()
+    .Filter(x => x != null, ErrorCode.NotFound)
+    .Then(ValidateAsset);  // May return ErrorCode.ValidationFailed
+
+if (result.IsFailure)
+{
+    Debug.LogError($"[{result.ErrorCode.Category}] {result.Error}");
+    // [Resource] Asset not found: player_model.prefab
+}
+```
+
+**For the 1% Case: When Type-Safe Errors Are Really Needed**
+
+If you really need typed errors for complex domain logic:
+
+```csharp
+// Method 1: Use custom ErrorCode
+public static class PaymentErrors
+{
+    public static readonly ErrorCode InsufficientFunds = ErrorCode.Custom(1001, "Payment");
+    public static readonly ErrorCode InvalidCard = ErrorCode.Custom(1002, "Payment");
+    public static readonly ErrorCode NetworkTimeout = ErrorCode.Custom(1003, "Payment");
+}
+
+var paymentResult = ProcessPayment()
+    .Recover(code => code == PaymentErrors.NetworkTimeout 
+        ? RetryPayment() 
+        : RefundUser());
+
+// Method 2: Discriminated Union Pattern (C# 9.0+)
+public record PaymentError
+{
+    public record InsufficientFunds(decimal Required, decimal Available) : PaymentError;
+    public record InvalidCard(string CardNumber) : PaymentError;
+    public record NetworkTimeout(int Attempts) : PaymentError;
+}
+
+// Store serialized in Result's Error message
+var result = payment switch
+{
+    PaymentError.InsufficientFunds e => 
+        Result<Payment>.Failure(ErrorCode.Custom(1001, "Payment"), 
+                                $"Insufficient: {e.Required - e.Available}"),
+    // ...
+};
+```
+
+---
+
+### UniFP vs language-ext
+
+#### Why Not Use language-ext Directly in Unity?
+
+language-ext is the best functional library in the .NET ecosystem, but it's not suitable for Unity:
+
+**1. Lack of Unity Runtime Optimization**
+- language-ext is designed for general-purpose .NET
+- Many types are class-based → Increased GC pressure
+- Potential compatibility issues with Unity's IL2CPP AOT compilation
+
+**2. Overwhelming Feature Complexity**
+- Over 100 monads and transformers
+- Higher-kinded types simulation (complex generic patterns)
+- Unnecessary features for game development: Parsec, Lenses, Free monads, etc.
+
+**3. Learning Curve**
+- Haskell-style naming conventions (`camelCase` static functions)
+- Complex abstractions in the Trait system
+- Excessive functional concepts unfamiliar to Unity developers
+
+**4. Performance Overhead**
+- Indirect calls due to high-level abstractions
+- Difficulty identifying hot paths in Unity Profiler
+
+#### Feature Comparison
+
+| Category | language-ext | UniFP | Unity Game Development Perspective |
+|----------|-------------|-------|-----------------------------------|
+| **Core Monads** | Option, Either, Try, Validation, Fin | Result, Option, NonEmpty | UniFP provides Unity-specific minimal set ✅ |
+| **Immutable Collections** | Arr, Lst, Seq, Map, HashMap, Set... | Standard C# collections + extension methods | language-ext excellent but excessive for Unity ⚠️ |
+| **Async** | IO monad, Eff, Pipes, StreamT | AsyncResult (UniTask/Awaitable) | UniFP better Unity ecosystem integration ✅ |
+| **Error Handling** | Either<L,R>, Validation<E,S>, Fin<A> | Result<T> + ErrorCode | UniFP simpler and clearer ✅ |
+| **Parser Combinators** | Parsec (full implementation) | Not supported | Unnecessary for games (language-ext wins) ❌ |
+| **Lenses & Optics** | Full support | Not supported | Excessive for games (Unreal FProperty more appropriate) ❌ |
+| **Atomic Concurrency** | Atom, Ref, AtomHashMap | Not supported | Unity is single-threaded, use C# standard if needed ⚠️ |
+| **Performance** | Overhead from high-level abstractions | Zero-GC structs, pooling optimizations | UniFP optimized for Unity ✅ |
+| **Learning Curve** | Steep (Haskell background needed) | Gentle (can start with just C# LINQ experience) | UniFP better accessibility ✅ |
+
+---
 
 ## Getting Started
 
@@ -90,17 +332,32 @@ To modify `Packages/manifest.json` directly, add the following dependency:
 
 Copy the `src/UniFP/Assets/Plugins/UniFP` directory to your project under `Assets/Plugins/UniFP`. Include `UniFP.asmdef` to keep Unity build times fast.
 
-### Dependencies
+### Optional Dependencies
 
-UniFP requires **UniTask**. It will be installed automatically with UPM installation, but for manual installation, you need to install it separately:
+UniFP works standalone, but you can enhance async functionality by installing one of the following:
 
-```text
-https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask
-```
+**Option 1: UniTask** (Recommended for Unity 2020.3+)
+- More features and better performance than Unity's Awaitable
+- Install via UPM:
+  ```text
+  https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask
+  ```
+- Enables `AsyncResult.ThenAsync`, `MapAsync`, `FilterAsync`, `DoAsync`, `TryAsync`
+
+**Option 2: Unity Awaitable** (Unity 6.0+)
+- Built into Unity 6.0+, no installation needed
+- Automatically detected via `versionDefines` in UniFP.asmdef
+- Provides the same async API as UniTask
+
+**Without async support:**
+- All synchronous `Result<T>` features work perfectly
+- Async extensions won't be available
 
 ## Core Concepts
 
-### `Result<T>` — Escape the if/else and try/catch Hell 🔥🔥🔥
+### `Result<T>` Usage
+
+`Result<T>` expresses **success** (Success) or **failure** (Failure) as types, freeing you from if/else and try/catch hell.
 
 Have you ever encountered code like this? An if containing a try, which contains another if-else... Success logic, failure logic, exception handling, and default value assignments are tangled like spaghetti, making it hard to know where to start reading. The moment you add one more validation step, the hell gets deeper and eventually becomes code no one wants to touch.
 
@@ -192,7 +449,132 @@ public class LoginSample : MonoBehaviour
 - On failure, the pipeline automatically routes to `Recover`, cleanly separating exception and default value recovery logic.
 - Additional validations or async calls can be easily extended with `Then`, `Filter`, `ThenAsync`, etc.
 
-### `Option<T>` — Escape the Null Hell 🔥🔥🔥
+#### Creating a Result
+
+```csharp
+using UniFP;
+
+// 1. Create directly with Success / Failure
+var success = Result<int>.Success(42);
+var failure = Result<int>.Failure(ErrorCode.NotFound);
+var failureWithMsg = Result<int>.Failure(ErrorCode.ValidationFailed, "Age must be greater than 0");
+
+// 2. Promote a value to Result with FromValue
+var fromValue = Result.FromValue(userId);
+
+// 3. Convert exceptions to Result with Try
+var parseResult = Result.Try(() => int.Parse(input));
+var parseWithCode = Result.Try(() => int.Parse(input), ErrorCode.InvalidInput);
+```
+
+#### Core Methods: Then, Map, Filter
+
+```csharp
+// Then: Chain Result-returning functions
+Result<User> LoadUser(int id) => /* ... */;
+var result = Result.FromValue(42)
+    .Then(LoadUser);  // int -> Result<User>
+
+// Map: Transform regular value-returning functions
+var doubled = Result.FromValue(10)
+    .Map(x => x * 2);  // int -> int (automatically wrapped in Result<int>)
+
+// Filter: Conditional validation (Failure on condition fail)
+var validated = Result.FromValue(age)
+    .Filter(x => x >= 18, ErrorCode.ValidationFailed, "Adults only");
+```
+
+> **💡 Tip: Then vs Map**
+> - `Then` is used for functions that return Result (operations that can fail)
+> - `Map` is used for functions that return regular values (simple transformations)
+
+#### Error Handling and Recovery
+
+```csharp
+// Recover: Replace failure with default value
+var withDefault = LoadConfig()
+    .Recover(code => DefaultConfig);
+
+// IfFailed: Execute alternative pipeline on failure
+var cached = LoadFromServer()
+    .IfFailed(() => LoadFromCache());
+
+// Catch: Intercept and recover from specific errors
+var result = LoadResource()
+    .Catch(ErrorCode.NotFound, () => CreateDefault());
+
+// Match: Different handling based on success/failure
+result.Match(
+    onSuccess: user => Debug.Log($"Welcome, {user.Name}"),
+    onFailure: code => Debug.LogError($"Load failed: {code}"));
+```
+
+#### Side Effects
+
+```csharp
+// Do: Execute side effect only on success (skip on failure)
+var result = LoadUser(id)
+    .Do(user => Analytics.Track("UserLoaded", user.Id))
+    .Do(user => Debug.Log($"Loaded: {user.Name}"));
+
+// DoStrict: Abort pipeline if side effect fails
+var saved = CreateUser(data)
+    .DoStrict(user => SaveToDatabase(user));  // Entire operation fails if DB save fails
+
+// IfFailed: Execute side effect only on failure
+var result = Process()
+    .IfFailed(code => Debug.LogError($"Processing failed: {code}"));
+```
+
+#### Conditional Execution
+
+```csharp
+// ThenIf / MapIf: Selectively transform based on condition
+var result = LoadUser(id)
+    .ThenIf(
+        condition: user => user.IsPremium,
+        thenFunc: user => LoadPremiumData(user),
+        elseFunc: user => Result<UserData>.Success(user.BasicData));
+
+var processed = Result.FromValue(input)
+    .MapIf(
+        condition: x => x > 100,
+        thenFunc: x => x / 2,
+        elseFunc: x => x);
+```
+
+#### Async Result (UniTask / Awaitable)
+
+```csharp
+using Cysharp.Threading.Tasks;  // or using UnityEngine; (Awaitable)
+
+// ThenAsync: Async Result chaining
+async UniTask<Result<User>> LoadUserAsync(int id)
+{
+    return await Result.FromValue(id)
+        .Filter(x => x > 0, ErrorCode.InvalidInput)
+        .ThenAsync(async id => await FetchFromAPI(id))
+        .MapAsync(json => ParseUser(json))
+        .FilterAsync(user => UniTask.FromResult(user.IsActive), "Inactive user");
+}
+
+// TryAsync: Convert exception-throwing async work to Result
+var result = await AsyncResult.TryAsync(async () => 
+{
+    var response = await httpClient.GetAsync(url);
+    return await response.Content.ReadAsStringAsync();
+}, ErrorCode.NetworkError);
+
+// DoAsync: Async side effects
+var saved = await LoadUser(id)
+    .DoAsync(async user => await SaveToCloud(user));
+```
+
+---
+
+### `Option<T>` Usage
+
+`Option<T>` expresses **has value** (Some) or **no value** (None) as types, freeing you from null hell.
 
 In Unity projects, you sometimes encounter code with dozens of lines of `null` checks. `if (foo == null)` → `else if (foo.Bar == null)` → `else if (foo.Bar.Length == 0)` ... Error logs pop up everywhere, and you waste time tracking down which branch threw a `NullReferenceException`.
 
@@ -259,29 +641,289 @@ public class UserProfileLoader
 - Adding validation logic is as simple as inserting another `Filter` step.
 - One final `Match` clearly separates normal and fallback flows.
 
-### Error Codes and Diagnostics
-
-UniFP uses `ErrorCode` enums to categorize failures without strings. In the Editor or debug builds, `SafeExecutor` automatically records operation types and call-site details.
+#### Creating an Option
 
 ```csharp
-public enum ErrorCode
+using UniFP;
+
+// 1. Create directly with Some / None
+var some = Option<int>.Some(42);
+var none = Option<int>.None();
+
+// 2. Convert nullable values to Option with From (null becomes None)
+var fromValue = Option<string>.From(PlayerPrefs.GetString("username"));  // null becomes None
+var fromNullable = Option<int>.From(nullableInt);
+
+// 3. Conditional conversion with Where (None on condition fail)
+var adult = Option<int>.From(age)
+    .Where(x => x >= 18);
+```
+
+#### Core Option Methods
+
+```csharp
+// Map: Transform value (skip if None)
+var doubled = Option<int>.Some(10)
+    .Map(x => x * 2);  // Some(20)
+
+var stillNone = Option<int>.None()
+    .Map(x => x * 2);  // None
+
+// Bind: Chain Option-returning functions
+Option<User> FindUser(string name) => /* ... */;
+var user = Option<string>.From(username)
+    .Bind(FindUser);
+
+// Filter: Conditional validation (None on fail)
+var valid = Option<int>.From(input)
+    .Filter(x => x > 0)
+    .Filter(x => x < 100);
+
+// Or / OrElse: Provide alternative value when None
+var withDefault = Option<string>.None()
+    .Or(Option<string>.Some("default value"));
+
+var fromFunc = Option<int>.None()
+    .OrElse(() => Option<int>.Some(GetDefaultValue()));
+
+// GetValueOrDefault: Extract value from Option
+var value = someOption.GetValueOrDefault(defaultValue);
+var valueOrNull = someOption.GetValueOrDefault();
+```
+
+#### Option and Result Conversion
+
+```csharp
+// Option -> Result: Convert None to error
+var result = Option<User>.From(FindUser(id))
+    .ToResult(ErrorCode.NotFound, "User not found");
+
+// Result -> Option: Convert failure to None (ignore error)
+var option = LoadConfig()
+    .ToOption();  // Success -> Some, Failure -> None
+```
+
+#### Branching with Match
+
+```csharp
+// Match: Different handling based on Some/None
+var message = Option<User>.From(user).Match(
+    onSome: u => $"Welcome, {u.Name}",
+    onNone: () => "Guest mode");
+
+// IfSome / IfNone: Handle only one case
+Option<Config>.From(config)
+    .IfSome(c => ApplyConfig(c))
+    .IfNone(() => UseDefaults());
+```
+
+#### Collection Helpers
+
+```csharp
+using System.Linq;
+
+var items = new[] { 1, 2, 3, 4, 5 };
+
+// TryFirst / TryLast: First/last element as Option
+var first = items.TryFirst();  // Some(1)
+var firstEven = items.TryFirst(x => x % 2 == 0);  // Some(2)
+var empty = Array.Empty<int>().TryFirst();  // None
+
+// TryFind: Find element matching condition
+var found = items.TryFind(x => x > 3);  // Some(4)
+
+// Choose: Extract only Some from Option collection
+var options = new[] 
+{ 
+    Option<int>.Some(1), 
+    Option<int>.None(), 
+    Option<int>.Some(3) 
+};
+var values = options.Choose();  // [1, 3]
+```
+
+#### LINQ Integration
+
+```csharp
+using System.Linq;
+
+// Select: Same as Map
+var doubled = Option<int>.Some(10)
+    .Select(x => x * 2);  // Some(20)
+
+// Where: Same as Filter
+var filtered = Option<int>.Some(42)
+    .Where(x => x > 18);  // Some(42)
+
+// SelectMany: Same as Bind (LINQ query syntax support)
+var result = 
+    from name in Option<string>.From(username)
+    from user in FindUser(name)
+    from profile in LoadProfile(user.Id)
+    select profile;
+```
+
+---
+
+### `NonEmpty<T>` Usage
+
+`NonEmpty<T>` is a collection that **guarantees at least one element**. Suitable for domains where emptiness is not allowed, such as party composition or required slots.
+
+#### Creating a NonEmpty
+
+```csharp
+using UniFP;
+
+// Create: Create with at least one element
+var squad = NonEmpty.Create("Leader", "Support", "Tank");
+var single = NonEmpty.Create(42);
+
+// FromList: Convert from list (fail if empty)
+var list = new List<string> { "A", "B", "C" };
+var nonEmpty = NonEmpty.FromList(list);  // Result<NonEmpty<string>>
+
+var emptyList = new List<string>();
+var failed = NonEmpty.FromList(emptyList);  // Failure (empty)
+```
+
+#### NonEmpty Methods
+
+```csharp
+// Head / Tail: First element and rest
+var squad = NonEmpty.Create("Leader", "Tank", "Healer");
+var leader = squad.Head;  // "Leader" (always exists)
+var others = squad.Tail;  // ["Tank", "Healer"] (IEnumerable)
+
+// Map: Transform all elements
+var upper = squad.Map(role => role.ToUpper());  // NonEmpty<string>
+
+// Append / Prepend: Add elements
+var expanded = squad.Append("Mage");  // NonEmpty (still at least one)
+var withNewLeader = squad.Prepend("NewLeader");
+
+// ToList / ToArray: Convert to regular collection
+var list = squad.ToList();
+var array = squad.ToArray();
+```
+
+#### Usage Examples
+
+```csharp
+// Party system: At least one leader required
+public class Party
 {
-    None,
-    InvalidInput,
-    NotFound,
-    NetworkError,
-    Timeout
+    private readonly NonEmpty<Player> _members;
+
+    public Party(Player leader, params Player[] others)
+    {
+        _members = NonEmpty.Create(leader, others);
+    }
+
+    public Player Leader => _members.Head;
+    public IEnumerable<Player> AllMembers => _members;
+
+    public void Buff()
+    {
+        // Compile-time guarantee of at least one member
+        _members.Map(p => p.ApplyBuff());
+    }
+}
+
+// Configuration: At least one server address required
+var servers = NonEmpty.Create(
+    "https://primary.server.com",
+    "https://backup1.server.com",
+    "https://backup2.server.com"
+);
+
+var primary = servers.Head;
+var fallbacks = servers.Tail;
+```
+
+---
+
+### Error Codes and Diagnostics
+
+UniFP provides **Zero-GC error classification** with the `ErrorCode` struct.
+
+#### Built-in ErrorCode
+
+```csharp
+// 0-999: UniFP reserved range
+ErrorCode.None              // 0: No error
+ErrorCode.Unknown           // 1: Unknown error
+ErrorCode.InvalidInput      // 100: Invalid input
+ErrorCode.ValidationFailed  // 101: Validation failed
+ErrorCode.NotFound          // 102: Not found
+ErrorCode.Unauthorized      // 103: Unauthorized
+ErrorCode.OperationFailed   // 104: Operation failed
+ErrorCode.Timeout           // 105: Timeout
+ErrorCode.NetworkError      // 106: Network error
+ErrorCode.Forbidden         // 107: Forbidden
+ErrorCode.InvalidOperation  // 108: Invalid operation
+```
+
+#### Custom ErrorCode
+
+```csharp
+// 1000+: User-defined error codes
+public static class GameErrors
+{
+    public static readonly ErrorCode InsufficientGold = 
+        ErrorCode.Custom(1001, "Economy");
+    
+    public static readonly ErrorCode InventoryFull = 
+        ErrorCode.Custom(1002, "Inventory");
+    
+    public static readonly ErrorCode QuestNotAvailable = 
+        ErrorCode.Custom(1003, "Quest");
+}
+
+// Usage example
+var result = PurchaseItem(itemId, price)
+    .Filter(success => player.Gold >= price, GameErrors.InsufficientGold, 
+            $"Insufficient gold: need {price - player.Gold} more");
+```
+
+#### ErrorCode Properties
+
+```csharp
+var error = ErrorCode.NotFound;
+
+error.Code;       // 102
+error.Category;   // "Resource"
+error.IsCustom;   // false (built-in code)
+
+var custom = ErrorCode.Custom(2001, "Payment");
+custom.Code;      // 2001
+custom.Category;  // "Payment"
+custom.IsCustom;  // true
+```
+
+#### Diagnostic Information (Debug Mode)
+
+```csharp
+// Automatically recorded in Editor or UNIFP_DEBUG environment
+var result = LoadAsset(path)
+    .Filter(asset => asset != null, ErrorCode.NotFound);
+
+if (result.IsFailure)
+{
+    // Information automatically recorded on failure
+    Debug.LogError($"[{result.ErrorCode.Category}] {result.Error}");
+    Debug.LogError($"Location: {result.FilePath}:{result.LineNumber}");
+    Debug.LogError($"Method: {result.MemberName}");
+    Debug.LogError($"Operation type: {result.OperationType}");
+    
+    // Example output:
+    // [Resource] Asset not found: player_model.prefab
+    // Location: Assets/Scripts/AssetLoader.cs:42
+    // Method: LoadPlayerModel
+    // Operation type: Filter
 }
 ```
 
-### `NonEmpty<T>` — Collections Guaranteed to Have at Least One Item
-
-Use when you need collections that cannot be empty. Suitable for domains like party composition and required slots.
-
-```csharp
-var squad = NonEmpty.Create("Leader", "Support", "Tank");
-var upper = squad.Map(role => role.ToUpperInvariant());
-```
+---
 
 ## Fluent Pipelines
 
@@ -324,11 +966,14 @@ var snapshot = stats.Zip(
 - `FilterResults`, `Partition`, `Fold`, `AggregateResults`, etc. perform list validation and aggregation.
 - `SpanExtensions` operates on `Span<T>` without additional allocation, even in Burst-sensitive code.
 
-## Async & UniTask Integration
+## Async Support (UniTask / Awaitable)
 
-UniTask and Result pipelines combine naturally.
+UniFP supports async operations with both **UniTask** (recommended) and **Unity Awaitable** (Unity 6.0+).
 
+**With UniTask installed:**
 ```csharp
+using Cysharp.Threading.Tasks;
+
 async UniTask<Result<PlayerData>> FetchPlayer(int id)
 {
     return await Result.TryFromResult(() => ValidateId(id))
@@ -336,6 +981,22 @@ async UniTask<Result<PlayerData>> FetchPlayer(int id)
         .MapAsync(payload => payload.ToPlayerData())
         .FilterAsync(data => UniTask.FromResult(data.IsActive), "Player is not active");
 }
+```
+
+**With Unity 6.0+ (Awaitable):**
+```csharp
+using UnityEngine;
+
+async Awaitable<Result<PlayerData>> FetchPlayer(int id)
+{
+    return await Result.TryFromResult(() => ValidateId(id))
+        .ThenAsync(async _ => await Api.GetPlayer(id))
+        .MapAsync(payload => payload.ToPlayerData())
+        .FilterAsync(data => Awaitable.FromResult(data.IsActive), "Player is not active");
+}
+```
+
+Both provide the same API - just swap the async type!
 
 var cached = await FetchPlayer(42).DoAsync(data => Cache.Save(data));
 ```
