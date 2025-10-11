@@ -1,23 +1,44 @@
 {
   "name": "com.nekoya.unifp",
   "version": "1.0.5",
-  "displayName": "UniFP",
-  "description": "Functional programming library for Unity",
-  "unity": "2020.3",
+  "displayName": "UniFP - Functional Programming for Unity",
+  "description": "Zero-GC functional programming library with Result<T> monad, pipeline patterns, and type-safe error handling optimized for Unity game development",
+  "unity": "2022.3",
+  "unityRelease": "51f1",
+  "category": "Scripting",
   "documentationUrl": "https://github.com/Nekoya-Jin/UniFP",
   "changelogUrl": "https://github.com/Nekoya-Jin/UniFP/blob/master/CHANGELOG.md",
   "licensesUrl": "https://github.com/Nekoya-Jin/UniFP/blob/master/LICENSE",
   "keywords": [
-    "functional",
+    "functional-programming",
     "monad",
-    "result",
-    "pipe",
+    "result-type",
+    "option-type",
+    "railway-oriented",
     "error-handling",
-    "fp"
+    "pipeline",
+    "zero-gc",
+    "performance",
+    "type-safety",
+    "fp",
+    "unitask",
+    "async"
   ],
   "author": {
     "name": "Nekoya",
     "email": "dldjwls131@naver.com",
     "url": "https://github.com/Nekoya-Jin"
-  }
+  },
+  "samples": [
+    {
+      "displayName": "Basic Examples",
+      "description": "Basic Result<T> and Option<T> usage examples",
+      "path": "Samples~/BasicExamples"
+    },
+    {
+      "displayName": "Real-World Scenarios",
+      "description": "Login system and item purchase pipeline examples",
+      "path": "Samples~/RealWorldExamples"
+    }
+  ]
 }

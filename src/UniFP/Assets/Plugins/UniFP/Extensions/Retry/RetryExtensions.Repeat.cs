@@ -1,5 +1,7 @@
 using System;
+#if UNIFP_UNITASK
 using Cysharp.Threading.Tasks;
+#endif
 
 namespace UniFP
 {
@@ -28,6 +30,7 @@ namespace UniFP
             return result;
         }
 
+#if UNIFP_UNITASK
         /// <summary>Repeat async operation N times</summary>
         public static async UniTask<Result<T>> RepeatAsync<T>(
             Func<UniTask<Result<T>>> operation,
@@ -47,5 +50,6 @@ namespace UniFP
 
             return result;
         }
+#endif
     }
 }

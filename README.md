@@ -4,7 +4,7 @@
 
 # UniFP — C# Functional Programming for Unity
 
-[![Unity](https://img.shields.io/badge/Unity-2020.3%2B-000?logo=unity)](https://unity.com/)
+[![Unity](https://img.shields.io/badge/Unity-2022.3%20LTS-000?logo=unity)](https://unity.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-success.svg)](./LICENSE)
 [![Version](https://img.shields.io/github/package-json/v/Nekoya-Jin/UniFP?filename=src%2FUniFP%2FAssets%2FPlugins%2FUniFP%2Fpackage.json&label=version&color=blue)](https://github.com/Nekoya-Jin/UniFP/releases)
 
@@ -153,7 +153,7 @@ To modify `Packages/manifest.json` directly, add the following dependency:
 
 UniFP works standalone, but you can enhance async functionality by installing one of the following:
 
-**Option 1: UniTask** (Recommended for Unity 2020.3+)
+**Option 1: UniTask** (Recommended for Unity 2022.3+)
 - More features and better performance than Unity's Awaitable
 - Install via UPM:
   ```text
