@@ -6,7 +6,7 @@
 
 [![Unity](https://img.shields.io/badge/Unity-2022.3%20LTS-000?logo=unity)](https://unity.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-success.svg)](./LICENSE)
-[![Version](https://img.shields.io/github/package-json/v/nekoya404/UniFP?filename=src%2FUniFP%2FAssets%2FPlugins%2FUniFP%2Fpackage.json&label=version&color=blue)](https://github.com/nekoya404/UniFP/releases)
+[![Version](https://img.shields.io/github/package-json/v/Nekoya-Jin/UniFP?filename=src%2FUniFP%2FAssets%2FPlugins%2FUniFP%2Fpackage.json&label=version&color=blue)](https://github.com/Nekoya-Jin/UniFP/releases)
 
 UniFP 是受 Rust、Haskell 和 F# 启发的 Unity C# 函数式编程框架。通过 Result 单子和管道模式，为游戏逻辑提供安全且明确的错误处理，同时保持零 GC 分配。
 
@@ -291,7 +291,7 @@ if (result.IsFailure)
 
 ## 流式流水线-000?logo=unity)](https://unity.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-success.svg)](./LICENSE)
-[![Version](https://img.shields.io/github/package-json/v/nekoya404/UniFP?filename=src%2FUniFP%2FAssets%2FPlugins%2FUniFP%2Fpackage.json&label=version&color=blue)](https://github.com/nekoya404/UniFP/releases)
+[![Version](https://img.shields.io/github/package-json/v/Nekoya-Jin/UniFP?filename=src%2FUniFP%2FAssets%2FPlugins%2FUniFP%2Fpackage.json&label=version&color=blue)](https://github.com/Nekoya-Jin/UniFP/releases)
 
 UniFP 是一款受 Rust、Haskell 与 F# 启发的 Unity 专用 C# 函数式编程框架，追求 GC 零分配，让函数式思维与显式错误处理安全落地在游戏逻辑中。
 
@@ -408,7 +408,7 @@ language-ext 是 .NET 生态系统中最好的函数式库，但不适合 Unity�
 2. 选择 **Add package from git URL...**，粘贴以下地址。
 
    ```text
-   https://github.com/nekoya404/UniFP.git?path=src/UniFP/Assets/Plugins/UniFP
+   https://github.com/Nekoya-Jin/UniFP.git?path=src/UniFP/Assets/Plugins/UniFP
    ```
 
 3. Unity 会安装 `com.unifp.core`，同时导入 asmdef 及示例。
@@ -418,7 +418,7 @@ language-ext 是 .NET 生态系统中最好的函数式库，但不适合 Unity�
 ```json
 {
   "dependencies": {
-    "com.unifp.core": "https://github.com/nekoya404/UniFP.git?path=src/UniFP/Assets/Plugins/UniFP"
+    "com.unifp.core": "https://github.com/Nekoya-Jin/UniFP.git?path=src/UniFP/Assets/Plugins/UniFP"
   }
 }
 ```

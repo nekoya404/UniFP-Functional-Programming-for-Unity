@@ -6,7 +6,7 @@
 
 [![Unity](https://img.shields.io/badge/Unity-2022.3%20LTS-000?logo=unity)](https://unity.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-success.svg)](./LICENSE)
-[![Version](https://img.shields.io/github/package-json/v/nekoya404/UniFP?filename=src%2FUniFP%2FAssets%2FPlugins%2FUniFP%2Fpackage.json&label=version&color=blue)](https://github.com/nekoya404/UniFP/releases)
+[![Version](https://img.shields.io/github/package-json/v/Nekoya-Jin/UniFP?filename=src%2FUniFP%2FAssets%2FPlugins%2FUniFP%2Fpackage.json&label=version&color=blue)](https://github.com/Nekoya-Jin/UniFP/releases)
 
 UniFP is a GC zero-allocation C# functional programming framework for Unity, inspired by Rust, Haskell, and F#. It brings functional thinking and explicit error handling to game logic without hurting runtime performance.
 
@@ -134,7 +134,7 @@ For complex domain logic requiring type-safe errors, custom ErrorCode patterns a
 2. Select **Add package from git URL...** and enter the address below.
 
    ```text
-   https://github.com/nekoya404/UniFP.git?path=src/UniFP/Assets/Plugins/UniFP
+   https://github.com/Nekoya-Jin/UniFP.git?path=src/UniFP/Assets/Plugins/UniFP
    ```
 
 3. Unity will install the `com.unifp.core` package and add folders with examples and asmdef.
@@ -144,7 +144,7 @@ To modify `Packages/manifest.json` directly, add the following dependency:
 ```json
 {
   "dependencies": {
-    "com.unifp.core": "https://github.com/nekoya404/UniFP.git?path=src/UniFP/Assets/Plugins/UniFP"
+    "com.unifp.core": "https://github.com/Nekoya-Jin/UniFP.git?path=src/UniFP/Assets/Plugins/UniFP"
   }
 }
 ```

@@ -6,9 +6,9 @@
   "unity": "2022.3",
   "unityRelease": "51f1",
   "category": "Scripting",
-  "documentationUrl": "https://github.com/nekoya404/UniFP",
-  "changelogUrl": "https://github.com/nekoya404/UniFP/blob/master/CHANGELOG.md",
-  "licensesUrl": "https://github.com/nekoya404/UniFP/blob/master/LICENSE",
+  "documentationUrl": "https://github.com/Nekoya-Jin/UniFP",
+  "changelogUrl": "https://github.com/Nekoya-Jin/UniFP/blob/master/CHANGELOG.md",
+  "licensesUrl": "https://github.com/Nekoya-Jin/UniFP/blob/master/LICENSE",
   "keywords": [
     "functional-programming",
     "monad",
